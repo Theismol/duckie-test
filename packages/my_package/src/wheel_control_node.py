@@ -12,6 +12,12 @@ DIRECTION_LEFT = 1         # forward
 THROTTLE_RIGHT = 0.43       # 30% throttle
 DIRECTION_RIGHT = 1       # backward
 
+TURN_RIGHT = (0.1,0)
+FORWARD = (0.1,0.13)
+BACKWARD = (-0.1,-0.13)
+TURN_LEFT = (0,0.1)
+directions = ['r','f','f','l','f','f','l','f','f','l','f','f']
+
 
 class WheelControlNode(DTROS):
 
@@ -29,11 +35,19 @@ class WheelControlNode(DTROS):
 
     def run(self):
         # publish 10 messages every second (10 Hz)
-        rate = rospy.Rate(0.1)
+        rate = rospy.Rate(0.8)
         while not rospy.is_shutdown():
-            message = WheelsCmdStamped(vel_left=self._vel_left, vel_right=self._vel_right)
-            self._publisher.publish(message)
-            rate.sleep()
+            for direction in directions:
+                if direction == 'f':
+                    message = WheelsCmdStamped(vel_left=FORWARD[0], vel_right=FORWARD[1])
+                elif direction == 'l':
+                    message = WheelsCmdStamped(vel_left=TURN_LEFT[0], vel_right=TURN_LEFT[1])
+                elif direction == 'b':
+                    message = WheelsCmdStamped(vel_left=BACKWARD[0], vel_right=BACKWARD[1])
+                elif direction == 'r':
+                    message = WheelsCmdStamped(vel_left=TURN_RIGHT[0], vel_right=TURN_RIGHT[1])
+                self._publisher.publish(message)
+                rate.sleep()
 
     def on_shutdown(self):
         stop = WheelsCmdStamped(vel_left=0, vel_right=0)
