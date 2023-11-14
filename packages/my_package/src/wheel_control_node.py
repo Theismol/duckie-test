@@ -16,7 +16,8 @@ TURN_RIGHT = (0.1,0)
 FORWARD = (0.1,0.13)
 BACKWARD = (-0.1,-0.13)
 TURN_LEFT = (0,0.1)
-directions = ['r','f','f','l','f','f','l','f','f','l','f','f']
+# r: 0 f: 1 l: 2 b: 3
+directions = [0,0,1,1,2,2,1,1,2,2,1,1,2,2,1,1,2,2,1,1]
 
 
 class WheelControlNode(DTROS):
@@ -34,20 +35,26 @@ class WheelControlNode(DTROS):
         self._publisher = rospy.Publisher(wheels_topic, WheelsCmdStamped, queue_size=1)
 
     def run(self):
-        # publish 10 messages every second (10 Hz)
-        rate = rospy.Rate(0.8)
+        rate = rospy.Rate(1)
+        i = 0
         while not rospy.is_shutdown():
-            for direction in directions:
-                if direction == 'f':
-                    message = WheelsCmdStamped(vel_left=FORWARD[0], vel_right=FORWARD[1])
-                elif direction == 'l':
-                    message = WheelsCmdStamped(vel_left=TURN_LEFT[0], vel_right=TURN_LEFT[1])
-                elif direction == 'b':
-                    message = WheelsCmdStamped(vel_left=BACKWARD[0], vel_right=BACKWARD[1])
-                elif direction == 'r':
-                    message = WheelsCmdStamped(vel_left=TURN_RIGHT[0], vel_right=TURN_RIGHT[1])
-                self._publisher.publish(message)
-                rate.sleep()
+            if i == len(directions):
+                i = 0
+            if directions[i] == 1:
+                message = WheelsCmdStamped(vel_left=FORWARD[0], vel_right=FORWARD[1])
+                rospy.loginfo("f")
+            elif directions[i] == 2:
+                message = WheelsCmdStamped(vel_left=TURN_LEFT[0], vel_right=TURN_LEFT[1])
+                rospy.loginfo("l")
+            elif directions[i] == 3:
+                message = WheelsCmdStamped(vel_left=BACKWARD[0], vel_right=BACKWARD[1])
+                rospy.loginfo("b")
+            else:
+                message = WheelsCmdStamped(vel_left=TURN_RIGHT[0], vel_right=TURN_RIGHT[1])
+                rospy.loginfo("r")
+            i += 1
+            self._publisher.publish(message)
+            rate.sleep()
 
     def on_shutdown(self):
         stop = WheelsCmdStamped(vel_left=0, vel_right=0)
