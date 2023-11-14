@@ -246,6 +246,7 @@ graph = {
     (11, 15): {}
 }
 
+
 # Example start and goal nodes
 start_node = (7, 0)
 goal_node = (0, 9)
