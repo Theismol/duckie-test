@@ -50,6 +50,36 @@ def heuristic(node, goal):
     return abs(node[0] - goal[0]) + abs(node[1] - goal[1])
 
 
+def get_directions(path):
+    directions = []
+    directions_numbers = []
+    for i in range(len(path) - 1):
+        current_node = path[i]
+        next_node = path[i + 1]
+        if next_node[0] > current_node[0]:
+            directions.append('down')
+        elif next_node[0] < current_node[0]:
+            directions.append('up')
+        elif next_node[1] > current_node[1]:
+            directions.append('right')
+        elif next_node[1] < current_node[1]:
+            directions.append('left')
+    current_direction = directions[0]
+    for direction in directions:
+        if direction == current_direction:
+            directions_numbers.append("forward")
+        elif direction == "up" and current_direction == "right" or direction == "right" and current_direction == "down" or direction == "down" and current_direction == "left" or direction == "left" and current_direction == "up":
+            directions_numbers.append("left")
+            directions_numbers.append("forward")
+        elif direction == "up" and current_direction == "left" or direction == "left" and current_direction == "down" or direction == "down" and current_direction == "right" or direction == "right" and current_direction == "up":
+            directions_numbers.append("right")
+            directions_numbers.append("forward")
+    return directions_numbers
+
+
+
+
+
 
 graph = {
     (0, 0): {},
@@ -253,5 +283,6 @@ goal_node = (0, 9)
 # Example usage of the A* algorithm
 path = astar(start_node, goal_node, graph)
 print("Path found:", path)
+print("Directions:", get_directions(path))
 
 # Create an image to visualize the maze and the path
