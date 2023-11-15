@@ -7,11 +7,22 @@ from duckietown_msgs.msg import WheelsCmdStamped
 import a_star_test as a_star
 
 
+# throttle and direction for each wheel
+THROTTLE_LEFT = 0.4        # 50% throttle
+DIRECTION_LEFT = 1         # forward
+THROTTLE_RIGHT = 0.43       # 30% throttle
+DIRECTION_RIGHT = 1       # backward
+
 TURN_RIGHT = (0.2,0)
 FORWARD = (0.2,0.26)
 BACKWARD = (-0.2,-0.26)
 TURN_LEFT = (0,0.2)
 # r: 0 f: 1 l: 2 b: 3
+start_node = (7, 0)
+goal_node = (0, 9)
+
+directions = a_star.get_directions(a_star.astar(start_node, goal_node, a_star.graph)[0])
+#directions = [0,0,1,1,2,2,1,1,2,2,1,1,2,2,1,1,2,2,1,1]
 start_node = (7, 0)
 goal_node = (0, 9)
 
