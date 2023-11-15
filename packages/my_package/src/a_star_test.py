@@ -68,13 +68,15 @@ def get_directions(path):
     current_direction = directions[0]
     for direction in directions:
         if direction == current_direction:
-            directions_numbers.append("forward")
+            directions_numbers.append(1)
         elif direction == "up" and current_direction == "right" or direction == "right" and current_direction == "down" or direction == "down" and current_direction == "left" or direction == "left" and current_direction == "up":
-            directions_numbers.append("left")
-            directions_numbers.append("forward")
+            directions_numbers.append(2)
+            directions_numbers.append(1)
+            current_direction=direction
         elif direction == "up" and current_direction == "left" or direction == "left" and current_direction == "down" or direction == "down" and current_direction == "right" or direction == "right" and current_direction == "up":
-            directions_numbers.append("right")
-            directions_numbers.append("forward")
+            directions_numbers.append(0)
+            directions_numbers.append(2)
+            current_direction=direction
     return directions_numbers
 
 
@@ -296,5 +298,6 @@ if path:
     print("Total cost:", cost)
 else:
     print("No path found")
+print(get_directions(path))
 
 # Create an image to visualize the maze and the path
