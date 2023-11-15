@@ -289,15 +289,16 @@ graph = {
 
 
 # Example start and goal nodes
-start_node = (7, 0)
-goal_node = (0, 9)
+if __name__ == '__main__':
+    start_node = (7, 0)
+    goal_node = (0, 9)
 
-path, cost = astar(start_node, goal_node, graph)
-if path:
-    print("Path found:", path)
-    print("Total cost:", cost)
-else:
-    print("No path found")
-print(get_directions(path))
+    path, cost = astar(start_node, goal_node, graph)
+    if path:
+        print("Path found:", path)
+        print("Total cost:", cost)
+    else:
+        print("No path found")
+    print(get_directions(path))
 
 # Create an image to visualize the maze and the path
