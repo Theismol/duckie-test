@@ -7,12 +7,6 @@ from duckietown_msgs.msg import WheelsCmdStamped
 import a_star_test as a_star
 
 
-# throttle and direction for each wheel
-THROTTLE_LEFT = 0.4        # 50% throttle
-DIRECTION_LEFT = 1         # forward
-THROTTLE_RIGHT = 0.43       # 30% throttle
-DIRECTION_RIGHT = 1       # backward
-
 TURN_RIGHT = (0.2,0)
 FORWARD = (0.2,0.26)
 BACKWARD = (-0.2,-0.26)
@@ -33,14 +27,11 @@ class WheelControlNode(DTROS):
         # static parameters
         vehicle_name = os.environ['VEHICLE_NAME']
         wheels_topic = f"/{vehicle_name}/wheels_driver_node/wheels_cmd"
-        # form the message
-        self._vel_left = THROTTLE_LEFT * DIRECTION_LEFT
-        self._vel_right = THROTTLE_RIGHT * DIRECTION_RIGHT
         # construct publisher
         self._publisher = rospy.Publisher(wheels_topic, WheelsCmdStamped, queue_size=1)
 
     def run(self):
-        rate = rospy.Rate(1)
+        rate = rospy.Rate(1) #1 message every second
         i = 0
         while not rospy.is_shutdown():
             if i == len(directions):
