@@ -77,7 +77,7 @@ def get_directions(path):
             current_direction=direction
         elif direction == "up" and current_direction == "left" or direction == "left" and current_direction == "down" or direction == "down" and current_direction == "right" or direction == "right" and current_direction == "up":
             directions_numbers.append(0)
-            directions_numbers.append(2)
+            directions_numbers.append(1)
             current_direction=direction
     return directions_numbers
 
@@ -85,12 +85,12 @@ def get_directions(path):
 
 
 
-def calculate_cost_of_path(path, graph):
+'''def calculate_cost_of_path(path, graph):
     cost = 0
     for i in range(len(path) - 1):
         cost += graph[path[i]][path[i + 1]]
     return cost
-
+'''
 
 
 
