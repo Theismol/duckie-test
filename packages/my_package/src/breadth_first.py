@@ -1,7 +1,28 @@
-import matplotlib.pyplot as plt
-import networkx as nx
+from collections import deque
 
-# Your graph and start/goal nodes
+def breadth_first_search(graph, start, goal):
+    if start not in graph or goal not in graph:
+        return None  # If start or goal nodes are not in the graph, return None
+    
+    queue = deque([(start, [start])])  # Initialize a queue with start node and path
+    visited = set()  # Keep track of visited nodes
+    
+    while queue:
+        current_node, path = queue.popleft()
+        
+        if current_node == goal:
+            return path  # If goal node is reached, return the path
+        
+        if current_node not in visited:
+            visited.add(current_node)
+            neighbors = graph[current_node]
+            
+            for neighbor in neighbors:
+                queue.append((neighbor, path + [neighbor]))  # Add neighbors to the queue with updated path
+    
+    return None  # If no path is found between start and goal nodes
+
+
 graph = {
     (0, 0): {},
     (0, 1): {},
@@ -197,42 +218,14 @@ graph = {
     (11, 15): {}
 }
 
-start_node = (7, 0)
-goal_node = (0, 9)
 
-# Updated path
-# path = [(7, 0), (7, 1), (7, 2), (8, 2), (9, 2), (10, 2), (11, 2), (11, 3), (11, 4), (11, 5), (11, 6), (11, 7), (11, 8), (11, 9), (11, 10), (11, 11), (11, 12), (11, 13), (10, 13), (9, 13), (8, 13), (7, 13), (6, 13), (5, 13), (4, 13), (4, 12), (4, 11), (3, 11), (2, 11), (1, 11), (0, 11), (0, 10), (0, 9)]
-path = [(7, 0), (7, 1), (7, 2), (7, 3), (6, 3), (5, 3), (5, 4), (5, 5), (4, 5), (3, 5), (2, 5), (1, 5), (1, 6), (1, 7), (1, 8), (1, 9), (1, 10), (2, 10), (3, 10), (4, 10), (5, 10), (5, 11), (4, 11), (3, 11), (2, 11), (1, 11), (0, 11), (0, 10), (0, 9)]
-filtered_path = [node for node in path if node in graph]
+if __name__ == "__main__":
+    # Example usage:
+    start_node = (7, 0)
+    goal_node = (0, 9)
+    shortest_path = breadth_first_search(graph, start_node, goal_node)
 
-# Create a NetworkX DiGraph (Directed Graph)
-G = nx.DiGraph()
-
-for node, neighbors in graph.items():
-    G.add_node(node)
-    for neighbor, weight in neighbors.items():
-        G.add_edge(node, neighbor, weight=weight)  # Add weight as an attribute to edges
-
-# Draw the graph
-pos = {node: (node[1], -node[0]) for node in G.nodes()}  # Adjust coordinates for visualization
-
-plt.figure(figsize=(8, 8))
-nx.draw_networkx(G, pos, with_labels=False, node_color='white', node_size=500, font_size=10, font_color='black')
-
-# Mark the start and goal nodes
-start_color = 'green'
-goal_color = 'green'
-node_colors = ['black' if node not in (start_node, goal_node) else start_color if node == start_node else goal_color for node in G.nodes()]
-nx.draw_networkx_nodes(G, pos, node_color=node_colors, node_size=500)
-
-# Draw the path with arrowheads
-path_edges = [(filtered_path[i], filtered_path[i + 1]) for i in range(len(filtered_path) - 1)]
-path_colors = ['red' for _ in path_edges]
-nx.draw_networkx_edges(G, pos, edgelist=path_edges, edge_color='green', width=2, arrowsize=20)
-
-# Add edge labels
-edge_labels = {(edge[0], edge[1]): attrs['weight'] for edge, attrs in G.edges.items()}
-nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color='red')
-
-plt.axis('off')
-plt.show()
+    if shortest_path:
+        print(f"Shortest path from {start_node} to {goal_node}: ",shortest_path)
+    else:
+        print(f"No path found")
