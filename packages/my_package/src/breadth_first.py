@@ -1,95 +1,26 @@
-import heapq
+from collections import deque
 
-def astar(start, goal, graph):
-    open_set = {}
-    closed_set = {}
-
-    # Add the starting node to the open set
-    open_set[start] = (0, [start], 0)  # Add a third element to track the total cost
-
-    while open_set:
-        # Get the node with the lowest total cost from the open set
-        current_node = min(open_set, key=lambda node: open_set[node][2])
-        current_cost, path, total_cost = open_set[current_node]
-
-        # Remove the current node from the open set
-        del open_set[current_node]
-
-        # If we've reached the goal, return the path and its cost
+def breadth_first_search(graph, start, goal):
+    if start not in graph or goal not in graph:
+        return None  # If start or goal nodes are not in the graph, return None
+    
+    queue = deque([(start, [start])])  # Initialize a queue with start node and path
+    visited = set()  # Keep track of visited nodes
+    
+    while queue:
+        current_node, path = queue.popleft()
+        
         if current_node == goal:
-            return path, total_cost
-
-        # Add the current node to the closed set
-        closed_set[current_node] = (current_cost, total_cost)
-
-        # Check each neighbor of the current node
-        for neighbor, weight in graph[current_node].items():
-            # Calculate the tentative g score by adding the current cost and the edge weight
-            tentative_g_score = current_cost + weight
-
-            # Calculate the tentative f score
-            h_score = heuristic(neighbor, goal)
-            tentative_f_score = tentative_g_score + h_score
-
-            # Calculate the total cost by adding the current total cost and the edge weight
-            tentative_total_cost = total_cost + weight
-
-            if neighbor in closed_set and tentative_total_cost >= closed_set[neighbor][1]:
-                continue
-
-            if neighbor not in open_set or tentative_total_cost < open_set[neighbor][2]:
-                open_set[neighbor] = (tentative_f_score, path + [neighbor], tentative_total_cost)
-
-    # If we've exhausted all possible paths and haven't found the goal, return None
-    return None, None
-
-# Rest of your code remains the same
-
-
-def heuristic(node, goal):
-    # In this example, we'll use the Manhattan distance as our heuristic
-    return abs(node[0] - goal[0]) + abs(node[1] - goal[1])
-
-
-def get_directions(path):
-    directions = []
-    directions_numbers = []
-    for i in range(len(path) - 1):
-        current_node = path[i]
-        next_node = path[i + 1]
-        if next_node[0] > current_node[0]:
-            directions.append('down')
-        elif next_node[0] < current_node[0]:
-            directions.append('up')
-        elif next_node[1] > current_node[1]:
-            directions.append('right')
-        elif next_node[1] < current_node[1]:
-            directions.append('left')
-    current_direction = directions[0]
-    for direction in directions:
-        if direction == current_direction:
-            directions_numbers.append(1)
-        elif direction == "up" and current_direction == "right" or direction == "right" and current_direction == "down" or direction == "down" and current_direction == "left" or direction == "left" and current_direction == "up":
-            directions_numbers.append(2)
-            directions_numbers.append(1)
-            current_direction=direction
-        elif direction == "up" and current_direction == "left" or direction == "left" and current_direction == "down" or direction == "down" and current_direction == "right" or direction == "right" and current_direction == "up":
-            directions_numbers.append(0)
-            directions_numbers.append(2)
-            current_direction=direction
-    return directions_numbers
-
-
-
-
-
-def calculate_cost_of_path(path, graph):
-    cost = 0
-    for i in range(len(path) - 1):
-        cost += graph[path[i]][path[i + 1]]
-    return cost
-
-
+            return path  # If goal node is reached, return the path
+        
+        if current_node not in visited:
+            visited.add(current_node)
+            neighbors = graph[current_node]
+            
+            for neighbor in neighbors:
+                queue.append((neighbor, path + [neighbor]))  # Add neighbors to the queue with updated path
+    
+    return None  # If no path is found between start and goal nodes
 
 
 graph = {
@@ -288,18 +219,13 @@ graph = {
 }
 
 
-# Example start and goal nodes
-
 if __name__ == "__main__":
+    # Example usage:
     start_node = (7, 0)
     goal_node = (0, 9)
+    shortest_path = breadth_first_search(graph, start_node, goal_node)
 
-    path, cost = astar(start_node, goal_node, graph)
-    if path:
-        print("Path found:", path)
-        print("Total cost:", cost)
+    if shortest_path:
+        print(f"Shortest path from {start_node} to {goal_node}: ",shortest_path)
     else:
-        print("No path found")
-
-
-# Create an image to visualize the maze and the path
+        print(f"No path found")
