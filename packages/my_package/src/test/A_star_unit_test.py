@@ -459,7 +459,7 @@ class TestAStar(unittest.TestCase):
     (11, 13): {(11,14):1,(10,13):20},
     (11, 14): {(11,15):1},
     (11, 15): {}
-}
+    }
         # Make modifications to the graph
 
         path, cost = astar(self.start_node, self.goal_node, modified_graph)
