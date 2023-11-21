@@ -7,10 +7,10 @@ from duckietown_msgs.msg import WheelsCmdStamped
 import a_star_test as a_star
 
 
-TURN_RIGHT = (0.2,0)
-FORWARD = (0.2,0.26)
+TURN_RIGHT = (0.15,0)
+FORWARD = (0.20,0.17)
 BACKWARD = (-0.2,-0.26)
-TURN_LEFT = (0,0.2)
+TURN_LEFT = (0,0.17)
 # r: 0 f: 1 l: 2 b: 3
 start_node = (7, 0)
 goal_node = (0, 9)
