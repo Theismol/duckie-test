@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 
+import ld_enc as ld
 import os
 import rospy
 from duckietown.dtros import DTROS, NodeType
 from sensor_msgs.msg import CompressedImage
 
 import cv2
+import numpy as np
 from cv_bridge import CvBridge
 
 class CameraReaderNode(DTROS):
@@ -22,17 +24,28 @@ class CameraReaderNode(DTROS):
         self._window = "camera-reader"
         cv2.namedWindow(self._window, cv2.WINDOW_AUTOSIZE)
         # construct subscriber
+        rospy.loginfo("yooo bot here")
         self.sub = rospy.Subscriber(self._camera_topic, CompressedImage, self.callback)
 
     def callback(self, msg):
         # convert JPEG bytes to CV image
         image = self._bridge.compressed_imgmsg_to_cv2(msg)
-        # display frame
+        image = ld.find_images(image)
+        # Display the image with the detected lines and midpoint
         cv2.imshow(self._window, image)
-        cv2.waitKey(1)
+        if cv2.waitKey(1) & 0xFF == ord('k'):
+            cv2.imwrite("save_img.jpg", image)
+            rospy.loginfo(os.popen("pwd").read())
+            rospy.loginfo("Image saved")
+        # Break the loop if 'q' key is pressed
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            cv2.destroyAllWindows()  # Close OpenCV windows
+            rospy.signal_shutdown("User pressed 'q' key")
 
 if __name__ == '__main__':
     # create the node
     node = CameraReaderNode(node_name='camera_reader_node')
     # keep spinning
     rospy.spin()
+
+
