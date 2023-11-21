@@ -290,6 +290,7 @@ graph = {
 }
 
 
+
 # Example start and goal nodes
 if __name__ == '__main__':
     start_node = (7, 0)
