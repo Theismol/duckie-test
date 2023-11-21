@@ -5,7 +5,6 @@ import numpy as np
 #image is cv2 image
 # Function that can find all the images in the current path
 def find_images(image):
-
     img = image
     height, width, _ = img.shape
     mask = np.zeros_like(img)
