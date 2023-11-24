@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-
 import os
 import rospy
 from duckietown.dtros import DTROS, NodeType
@@ -23,14 +22,12 @@ class CameraReaderNode(DTROS):
         # create window
         self._window = "camera-reader"
         cv2.namedWindow(self._window, cv2.WINDOW_AUTOSIZE)
-        # construct subscriber
-        rospy.loginfo("yooo bot here")
         self.sub = rospy.Subscriber(self._camera_topic, CompressedImage, self.callback)
 
     def callback(self, msg):
         # convert JPEG bytes to CV image
         image = self._bridge.compressed_imgmsg_to_cv2(msg)
-        image = getYellow.findFertures(image)
+        image, edges = getYellow.findFertures(image)
         #Display the image with the detected lines and midpoint
         cv2.imshow(self._window, image)
         if cv2.waitKey(1) & 0xFF == ord('q'):

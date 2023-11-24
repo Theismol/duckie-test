@@ -3,14 +3,12 @@ import numpy as np
 import os
 import findColor
 
-
-
-class egdePoligon:
-    def __init__(self, x, y, contour, color):
+class edgeFeature:
+    def __init__(self, x, y, color ):
         self.x = x
         self.y = y
-        self.contour = contour
         self.color = color
+
 
 def findFertures(img):
     #create a list of egdepoligons for each image
@@ -26,6 +24,7 @@ def findFertures(img):
     #show the hlaf high in imshow
     edges = cv2.Canny(gray_roi, 100, 200)
     contours, hierarchy = cv2.findContours(edges, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    edgesFeatures = []
     for i in range(len(contours)):
         area = cv2.contourArea(contours[i])
         if area < 50:
@@ -40,11 +39,12 @@ def findFertures(img):
         currebtPoint = np.array([[r, g, b]])
         #find the color of the point
         color = findColor.closest_centroid(currebtPoint)
+        edgesFeatures.append(edgeFeature(x,y,color))
         #add the y offset to the i element in the contour list
         for j in range(len(contours[i])):
             contours[i][j][0][1] = contours[i][j][0][1] + (height // 2)
         cv2.drawContours(img, contours, i, color, 2)
-    return img
+    return img, edgesFeatures
 
 
 
