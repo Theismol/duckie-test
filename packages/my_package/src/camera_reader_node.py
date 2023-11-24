@@ -24,10 +24,45 @@ class CameraReaderNode(DTROS):
         cv2.namedWindow(self._window, cv2.WINDOW_AUTOSIZE)
         self.sub = rospy.Subscriber(self._camera_topic, CompressedImage, self.callback)
 
+
+
+
+    def check_coordinates(self,image,edges):
+        y_yellowstripes = 0
+        x_yellowstripes = 0
+
+        x_whiteline = 0
+        y_whiteline = 0
+
+        average_yellowstripes = 0
+        average_whiteline = 0
+        for edge in edges:
+            if edge.color[0] == 255:
+                x_yellowstripes += edge.x
+                y_yellowstripes += edge.y
+                average_yellowstripes+= 1
+            else:
+                x_whiteline += edge.x
+                y_whiteline += edge.y
+                average_whiteline += 1
+
+        x_yellowstripes = x_yellowstripes/average_yellowstripes
+        y_yellowstripes = y_yellowstripes/average_yellowstripes
+        x_whiteline = x_whiteline/average_whiteline
+        y_whiteline = y_whiteline/average_whiteline
+
+        current_middle = image.width/2
+
+        if current_middle - x_yellowstripes < (x_whiteline - current_middle) + 40:
+            print("turn right")
+        elif current_middle - x_yellowstripes > (x_whiteline - current_middle) - 40:
+            print("turn left")
+
     def callback(self, msg):
         # convert JPEG bytes to CV image
         image = self._bridge.compressed_imgmsg_to_cv2(msg)
         image, edges = getYellow.findFertures(image)
+        self.check_coordinates(image, edges)
         #Display the image with the detected lines and midpoint
         cv2.imshow(self._window, image)
         if cv2.waitKey(1) & 0xFF == ord('q'):
