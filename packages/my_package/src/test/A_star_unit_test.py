@@ -4,7 +4,7 @@ import unittest
 def astar(start, goal, graph):
     open_set = {}
     closed_set = {}
-
+    #bingo
     # Add the starting node to the open set
     open_set[start] = (0, [start], 0)  # Add a third element to track the total cost
 
