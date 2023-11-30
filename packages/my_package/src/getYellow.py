@@ -27,7 +27,7 @@ def findFertures(img):
     edgesFeatures = []
     for i in range(len(contours)):
         area = cv2.contourArea(contours[i])
-        if area < 50:
+        if area < 80:
             continue
         M = cv2.moments(contours[i])
         x = int(M["m10"] / M["m00"])
