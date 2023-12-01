@@ -27,6 +27,12 @@ class WheelControlNode(DTROS):
         # static parameters
         vehicle_name = os.environ['VEHICLE_NAME']
         wheels_topic = f"/{vehicle_name}/wheels_driver_node/wheels_cmd"
+        self._forward = FORWARD
+        self._turn_left = TURN_LEFT
+        self._turn_right = TURN_RIGHT
+        self._backward = BACKWARD
+        #DET HER ER COPILOT MÅSKE KAN VI TESTE HVAD DER ER HER. KAN VÆRE DET ER DEN KALIBREREDE VÆRDI
+        #self._forward = rospy.get_param(f'/{vehicle_name}/kinematics_node/forward')
         # construct publisher
         self._publisher = rospy.Publisher(wheels_topic, WheelsCmdStamped, queue_size=1)
 
@@ -37,16 +43,16 @@ class WheelControlNode(DTROS):
             if i == len(directions):
                 i = 0
             if directions[i] == 1:
-                message = WheelsCmdStamped(vel_left=FORWARD[0], vel_right=FORWARD[1])
+                message = WheelsCmdStamped(vel_left=self._forward[0], vel_right=self._forward[1])
                 rospy.loginfo("f")
             elif directions[i] == 2:
-                message = WheelsCmdStamped(vel_left=TURN_LEFT[0], vel_right=TURN_LEFT[1])
+                message = WheelsCmdStamped(vel_left=self._turn_left[0], vel_right=self._turn_left[1])
                 rospy.loginfo("l")
             elif directions[i] == 3:
-                message = WheelsCmdStamped(vel_left=BACKWARD[0], vel_right=BACKWARD[1])
+                message = WheelsCmdStamped(vel_left=self._backward[0], vel_right=self._backward[1])
                 rospy.loginfo("b")
             else:
-                message = WheelsCmdStamped(vel_left=TURN_RIGHT[0], vel_right=TURN_RIGHT[1])
+                message = WheelsCmdStamped(vel_left=self._turn_right[0], vel_right=self._turn_right0[1])
                 rospy.loginfo("r")
             i += 1
             self._publisher.publish(message)
