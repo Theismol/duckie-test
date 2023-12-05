@@ -6,6 +6,7 @@ from duckietown.dtros import DTROS, NodeType
 from duckietown_msgs.msg import WheelsCmdStamped
 import a_star_test as a_star
 from lanedetection_message import lanedetection_message
+from std_msgs.msg import String
 
 
 TURN_RIGHT = (0.15,0)
@@ -36,7 +37,7 @@ class WheelControlNode(DTROS):
         #self._forward = rospy.get_param(f'/{vehicle_name}/kinematics_node/forward')
         # construct publisher
         self._publisher = rospy.Publisher(wheels_topic, WheelsCmdStamped, queue_size=1)
-        self._subsriber = rospy.Subscriber("lane_detection_correction", lanedetection_message, self.callback)
+        self._subsriber = rospy.Subscriber("lane_detection_correction", String, self.callback)
 
     def run(self):
         rate = rospy.Rate(1) #1 message every second
@@ -65,11 +66,11 @@ class WheelControlNode(DTROS):
         self._publisher.publish(stop)
 
     def callback(self, data):
-        if data.right:
+        if data.data == "right":
             self._forward = (0.22,0.17)
-        elif data.left:
+        elif data.data == "left":
             self._forward = (0.20,0.19)
-        elif data.no_change:
+        elif data.data == "no_change":
             self._forward = (0.20,0.17)
 
 

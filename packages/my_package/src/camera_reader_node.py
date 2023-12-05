@@ -76,17 +76,20 @@ class CameraReaderNode(DTROS):
             self.right = True
             self.left = False
             self.no_change = False
+            message = "right"
         elif current_middle - x_yellowstripes > 250:
             print("turn left")
             self.left = True
             self.right = False
             self.no_change = False
+            message = "left"
         else:
             print("no change in direction needed")
             self.no_change = True
             self.right = False
             self.left = False
-        message = "message pls work"
+            message = "no_change"
+
         self.pub.publish(message)
 
     def callback(self, msg):
