@@ -54,7 +54,7 @@ class WheelControlNode(DTROS):
                 message = WheelsCmdStamped(vel_left=self._backward[0], vel_right=self._backward[1])
                 rospy.loginfo("b")
             else:
-                message = WheelsCmdStamped(vel_left=self._turn_right[0], vel_right=self._turn_right0[1])
+                message = WheelsCmdStamped(vel_left=self._turn_right[0], vel_right=self._turn_right[1])
                 rospy.loginfo("r")
             i += 1
             self._publisher.publish(message)
