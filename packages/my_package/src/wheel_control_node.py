@@ -67,10 +67,13 @@ class WheelControlNode(DTROS):
     def callback(self, data):
         if data.data == "right":
             self._forward = (0.22,0.17)
+            print("right WE ARE IN CALLBACK")
         elif data.data == "left":
             self._forward = (0.20,0.19)
+            print("left WE ARE IN CALLBACK")
         elif data.data == "no_change":
             self._forward = (0.20,0.17)
+            print("no_change WE ARE IN CALLBACK")
 
 
 if __name__ == '__main__':
