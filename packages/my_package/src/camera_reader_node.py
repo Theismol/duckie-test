@@ -11,8 +11,13 @@ from cv_bridge import CvBridge
 
 class CameraReaderNode(DTROS):
 
+
+
+
     def __init__(self, node_name):
-        # initialize the DTROS parent class
+        self.right = False
+        self.left = False      # initialize the DTROS parent class
+        self.no_change = False
         super(CameraReaderNode, self).__init__(node_name=node_name, node_type=NodeType.VISUALIZATION)
         # static parameters
         self._vehicle_name = os.environ['VEHICLE_NAME']
@@ -23,6 +28,7 @@ class CameraReaderNode(DTROS):
         self._window = "camera-reader"
         cv2.namedWindow(self._window, cv2.WINDOW_AUTOSIZE)
         self.sub = rospy.Subscriber(self._camera_topic, CompressedImage, self.callback)
+        self.pub = rospy.Publisher("lane_detection_correction", {self.right, self.left, self.no_change}, queue_size=1)
 
 
 
@@ -63,12 +69,21 @@ class CameraReaderNode(DTROS):
 
         _, current_middle, _ = image.shape
         current_middle = current_middle/2
-        if (x_whiteline - current_middle) > 240:
+        if (x_whiteline - current_middle) > 220:
             print("turn right")
+            self.right = True
+            self.left = False
+            self.no_change = False
         elif current_middle - x_yellowstripes > 250:
             print("turn left")
+            self.left = True
+            self.right = False
+            self.no_change = False
         else:
             print("no change in direction needed")
+            self.no_change = True
+            self.right = False
+            self.left = False
 
     def callback(self, msg):
         # convert JPEG bytes to CV image

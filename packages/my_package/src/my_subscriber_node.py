@@ -10,7 +10,7 @@ class MySubscriberNode(DTROS):
         # initialize the DTROS parent class
         super(MySubscriberNode, self).__init__(node_name=node_name, node_type=NodeType.GENERIC)
         # construct subscriber
-        self.sub = rospy.Subscriber('chatter', String, self.callback)
+        self.sub = rospy.Subscriber('lane_detection_correction', {}, self.callback)
 
     def callback(self, data):
         rospy.loginfo("I heard '%s'", data.data)
