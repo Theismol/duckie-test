@@ -84,6 +84,7 @@ class CameraReaderNode(DTROS):
             self.no_change = True
             self.right = False
             self.left = False
+        self.pub.publish({self.right, self.left, self.no_change})
 
     def callback(self, msg):
         # convert JPEG bytes to CV image
