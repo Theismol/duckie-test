@@ -9,7 +9,6 @@ import getYellow
 import cv2
 import numpy as np
 from cv_bridge import CvBridge
-from lanedetection_message import lanedetection_message
 
 class CameraReaderNode(DTROS):
 

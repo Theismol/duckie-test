@@ -5,7 +5,6 @@ import rospy
 from duckietown.dtros import DTROS, NodeType
 from duckietown_msgs.msg import WheelsCmdStamped
 import a_star_test as a_star
-from lanedetection_message import lanedetection_message
 from std_msgs.msg import String
 
 
