@@ -3,6 +3,7 @@
 import os
 import rospy
 from duckietown.dtros import DTROS, NodeType
+from std_msgs.msg import String
 from sensor_msgs.msg import CompressedImage
 import getYellow
 import cv2
@@ -29,7 +30,7 @@ class CameraReaderNode(DTROS):
         self._window = "camera-reader"
         cv2.namedWindow(self._window, cv2.WINDOW_AUTOSIZE)
         self.sub = rospy.Subscriber(self._camera_topic, CompressedImage, self.callback)
-        self.pub = rospy.Publisher("lane_detection_correction", lanedetection_message, queue_size=1)
+        self.pub = rospy.Publisher("lane_detection_correction", String, queue_size=1)
 
 
 
@@ -85,7 +86,7 @@ class CameraReaderNode(DTROS):
             self.no_change = True
             self.right = False
             self.left = False
-        message = lanedetection_message(self.right,self.left,self.no_change)
+        message = "message pls work"
         self.pub.publish(message)
 
     def callback(self, msg):

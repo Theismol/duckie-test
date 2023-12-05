@@ -3,3 +3,4 @@ class lanedetection_message:
             self.right = right
             self.left = left
             self.no_change = no_change
+            
