@@ -71,7 +71,7 @@ class CameraReaderNode(DTROS):
 
         _, current_middle, _ = image.shape
         current_middle = current_middle/2
-        if (x_whiteline - current_middle) > 220:
+        if (x_whiteline - current_middle) > 230:
             print("turn right")
             self.right = True
             self.left = False
