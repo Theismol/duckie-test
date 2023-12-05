@@ -35,7 +35,7 @@ class WheelControlNode(DTROS):
         #self._forward = rospy.get_param(f'/{vehicle_name}/kinematics_node/forward')
         # construct publisher
         self._publisher = rospy.Publisher(wheels_topic, WheelsCmdStamped, queue_size=1)
-        self._subsriber = rospy.Subscriber("lane_detection_correction", {self.right, self.left, self.no_change}, self.callback)
+        self._subsriber = rospy.Subscriber("lane_detection_correction", {}, self.callback)
 
     def run(self):
         rate = rospy.Rate(1) #1 message every second
