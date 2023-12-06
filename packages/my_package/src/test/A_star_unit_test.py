@@ -4,7 +4,7 @@ import unittest
 def astar(start, goal, graph):
     open_set = {}
     closed_set = {}
-    #bingo
+
     # Add the starting node to the open set
     open_set[start] = (0, [start], 0)  # Add a third element to track the total cost
 
@@ -261,6 +261,27 @@ class TestAStar(unittest.TestCase):
         self.assertEqual(path[0], self.start_node)
         self.assertEqual(path[-1], self.goal_node)
         self.assertTrue(cost > 0)  # Assuming the cost is positive for a valid path
+    
+    def test_specific_path_astar(self):
+
+        # Calculate the expected specific path
+        expected_path = [
+        (7, 0), (7, 1), (7, 2), (8, 2), (9, 2), (10, 2), (11, 2), (11, 3), (11, 4), (11, 5),
+        (11, 6), (11, 7), (11, 8), (11, 9), (11, 10), (11, 11), (11, 12), (11, 13), (10, 13),
+        (9, 13), (8, 13), (7, 13), (6, 13), (5, 13), (4, 13), (4, 12), (4, 11), (3, 11),
+        (2, 11), (1, 11), (0, 11), (0, 10), (0, 9)
+        ]
+
+        # Obtain the path and cost from the A* algorithm
+        path, cost = astar(self.start_node, self.goal_node, self.graph)
+
+        # Assertions to check if the obtained path matches the expected path
+        self.assertEqual(path, expected_path, "Path does not match the expected path")
+        self.assertIsNotNone(cost, "Cost should not be None for a valid path")
+        self.assertTrue(cost > 0, "Cost should be a positive value for a valid path")
+
+
+
 
     def test_astar_no_path(self):
         # Modify graph to make it impossible to reach the goal from the start
