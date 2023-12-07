@@ -9,15 +9,15 @@ from std_msgs.msg import String
 
 
 TURN_RIGHT = (0.15,0)
-FORWARD = (0.10,0.085)
+FORWARD = (0.10,0.010)
 BACKWARD = (-0.2,-0.26)
 TURN_LEFT = (0,0.17)
 # r: 0 f: 1 l: 2 b: 3
 start_node = (7, 0)
 goal_node = (0, 9)
 
-directions = a_star.get_directions(a_star.astar(start_node, goal_node, a_star.graph)[0])
-#directions = [0,0,1,1,2,2,1,1,2,2,1,1,2,2,1,1,2,2,1,1]
+#directions = a_star.get_directions(a_star.astar(start_node, goal_node, a_star.graph)[0])
+directions = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 
 class WheelControlNode(DTROS):
 
@@ -42,6 +42,7 @@ class WheelControlNode(DTROS):
         i = 0
         while not rospy.is_shutdown():
             if i == len(directions):
+                rospy.loginfo("arrayed at tarked")
                 i = 0
             if directions[i] == 1:
                 message = WheelsCmdStamped(vel_left=self._forward[0], vel_right=self._forward[1])
@@ -65,7 +66,7 @@ class WheelControlNode(DTROS):
 
     def callback(self, data):
         if data.data == "right":
-            self._forward = (0.11,0.085)
+            self._forward = (0.11,0.010)
             print("right WE ARE IN CALLBACK")
         elif data.data == "left":
             self._forward = (0.10,0.095)
