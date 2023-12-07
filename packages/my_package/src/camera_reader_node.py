@@ -11,10 +11,6 @@ import numpy as np
 from cv_bridge import CvBridge
 
 class CameraReaderNode(DTROS):
-
-
-
-
     def __init__(self, node_name):
         self.right = False
         self.left = False      # initialize the DTROS parent class

@@ -4,7 +4,7 @@ import os
 import rospy
 from duckietown.dtros import DTROS, NodeType
 from duckietown_msgs.msg import WheelsCmdStamped
-import a_star_test as a_star
+import packages.my_package.src2.a_star as a_star
 from std_msgs.msg import String
 
 

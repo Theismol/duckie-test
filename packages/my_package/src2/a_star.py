@@ -85,12 +85,7 @@ def get_directions(path):
 
 
 
-'''def calculate_cost_of_path(path, graph):
-    cost = 0
-    for i in range(len(path) - 1):
-        cost += graph[path[i]][path[i + 1]]
-    return cost
-'''
+
 
 
 
