@@ -9,7 +9,7 @@ from std_msgs.msg import String
 
 
 TURN_RIGHT = (0.15,0)
-FORWARD = (0.10,0.010)
+FORWARD = (0.15,0.025)
 BACKWARD = (-0.2,-0.26)
 TURN_LEFT = (0,0.17)
 # r: 0 f: 1 l: 2 b: 3
