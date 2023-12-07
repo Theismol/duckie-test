@@ -293,8 +293,8 @@ graph = {
 
 # Example start and goal nodes
 if __name__ == '__main__':
-    start_node = (7, 0)
-    goal_node = (0, 9)
+    start_node = (10, 6)
+    goal_node = (10, 2)
 
     path, cost = astar(start_node, goal_node, graph)
     if path:
