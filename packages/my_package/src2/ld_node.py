@@ -1,33 +1,20 @@
-import cv2
-import numpy as np
-from math import sqrt
-from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler
-import pickle 
+#!/usr/bin/env python3
+
 import os
 import rospy
 from duckietown.dtros import DTROS, NodeType
 from std_msgs.msg import String
 from sensor_msgs.msg import CompressedImage
+import pickle 
+import cv2
+import numpy as np
 from cv_bridge import CvBridge
+from math import sqrt
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
 
-
-class edgeFeature:
-    def __init__(self, x, y, color ):
-        self.x = x
-        self.y = y
-        self.color = color
-
-
-class CameraReaderNode:
+class CameraReaderNode(DTROS):
     def __init__(self, node_name):
-        self.right = False
-        self.left = False      # initialize the DTROS parent class
-        self.no_change = False
-        kmeans = pickle.load(open('/code/catkin_ws/src/<duckie-test>/packages/my_package/src/imgs/finalized_model1.sav', 'rb'))
-        kmeans1 = pickle.load(open('/code/catkin_ws/src/<duckie-test>/packages/my_package/src/imgs/finalized_model.sav', 'rb'))
-        self.centroids = kmeans.cluster_centers_
-        self.centroids1 = kmeans1.cluster_centers_
         super(CameraReaderNode, self).__init__(node_name=node_name, node_type=NodeType.VISUALIZATION)
         # static parameters
         self._vehicle_name = os.environ['VEHICLE_NAME']
@@ -42,8 +29,8 @@ class CameraReaderNode:
 
     def callback(self, msg):
         # convert JPEG bytes to CV image
-        image, edges = self._bridge.compressed_imgmsg_to_cv2(msg)
-        self.findFertures(image)
+        image = self._bridge.compressed_imgmsg_to_cv2(msg)
+        image, edges = self.findFertures(image)
         #check_coordinates(image, edges)
         #Display the image with the detected lines and midpoint
         cv2.imshow(self._window, image)
