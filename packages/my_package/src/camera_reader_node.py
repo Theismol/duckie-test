@@ -90,7 +90,7 @@ class CameraReaderNode(DTROS):
         # convert JPEG bytes to CV image
         image = self._bridge.compressed_imgmsg_to_cv2(msg)
         image, edges = getYellow.findFertures(image)
-        self.check_coordinates(image, edges)
+        self.xxcheck_coordinates(image, edges)
         #Display the image with the detected lines and midpoint
         cv2.imshow(self._window, image)
         if cv2.waitKey(1) & 0xFF == ord('q'):

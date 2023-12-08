@@ -25,7 +25,6 @@ class CameraReaderNode(DTROS):
         self._window = "camera-reader"
         cv2.namedWindow(self._window, cv2.WINDOW_AUTOSIZE)
         self.sub = rospy.Subscriber(self._camera_topic, CompressedImage, self.callback)
-        self.pub = rospy.Publisher("lane_detection_correction", String, queue_size=1)
 
     def callback(self, msg):
         # convert JPEG bytes to CV image
