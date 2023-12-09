@@ -36,7 +36,7 @@ if __name__ == '__main__':
     start_node = (10, 6)
     goal_node = (10, 2)
     directions = generate_directions(start_node, goal_node)
-
+    directions = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
     # create the main node 
     node = MainNode(node_name='main_node')
     node.send_instruction()

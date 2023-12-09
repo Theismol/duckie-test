@@ -41,18 +41,16 @@ class CameraReaderNode(DTROS):
         self.sub = rospy.Subscriber(self._camera_topic, CompressedImage, self.callback)
         self.pub = rospy.Publisher("lane_detection_correction", String, queue_size=1)
 
-
     def callback(self, msg):
         # convert JPEG bytes to CV image
         image = self._bridge.compressed_imgmsg_to_cv2(msg)
-        image, edges = self.findFertures(image)
-        #check_coordinates(image, edges)
-        #Display the image with the detected lines and midpoint
+        image = self.findFertures(image)
         cv2.imshow(self._window, image)
         if cv2.waitKey(1) & 0xFF == ord('q'):
-            cv2.destroyAllWindows()  # Close OpenCV windows
+            cv2.destroyAllWindows()  #Close OpenCV windows
             rospy.signal_shutdown("User pressed 'q' key")
-
+        #check_coordinates(image, edges)
+        #Display the image with the detected lines and midpoint
 
     def findFertures(self, img):
         egdepoligonRed = []
@@ -84,17 +82,24 @@ class CameraReaderNode(DTROS):
             #find the color of the point
             color = closest_centroid(currebtPoint)
             #rgb
+            #draw the the centroid
+            cv2.circle(img, (x, y), 5, color, 2)
+
             if color == (0, 0, 255):
-                egdepoligonRed.append(edgePoligon(x, y, color))
-            elif color == (255, 0, 0):
                 egdepoligonBlue.append(edgePoligon(x, y, color))
+            elif color == (255, 0, 0):
+                egdepoligonRed.append(edgePoligon(x, y, color))
             #draw the circle
-            cv2.circle(img, (x, y), 5, (0, 255, 0), -1)
-            #show   
-            x1, y1, x2, y2 = lc.mainRed(egdepoligonRed, width)
-            mx1, my1, mx2, my2 = lc.mainBlue(egdepoligonBlue, width)
-            cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
-            cv2.line(img, (mx1, my1), (mx2, my2), (0, 0, 255), 3)
+            #if egdepoligonRed or egdepoligonBlue is empty return
+            cv2.circle(img, (x, y), 5, color, 1)
+        if not egdepoligonRed or not egdepoligonBlue:
+            return img
+        #show   
+        x1, y1, x2, y2 = lc.mainRed(egdepoligonRed, width)
+        #mx1, my1, mx2, my2 = lc.mainBlue(egdepoligonBlue, width, x1, y1, x2, y2)
+        cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
+        #cv2.line(img, (mx1, my1), (mx2, my2), (0, 0, 255), 3)
+
         return img
     
 kmeans = pickle.load(open('/code/catkin_ws/src/<duckie-test>/packages/my_package/src/imgs/finalized_model2.sav', 'rb'))

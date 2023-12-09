@@ -11,12 +11,9 @@ TURN_RIGHT = (0.17,0)
 FORWARD = (0.2,0.23)
 BACKWARD = (-0.2,-0.26)
 TURN_LEFT = (0,0.17)
-# r: 0 f: 1 l: 2 b: 3
-start_node = (7, 0)
-goal_node = (0, 9)
+STOP = (0,0)
 
 #directions = a_star.get_directions(a_star.astar(start_node, goal_node, a_star.graph)[0])
-directions = [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
 
 class WheelControlNode(DTROS):
 
@@ -30,6 +27,7 @@ class WheelControlNode(DTROS):
         self._turn_left = TURN_LEFT
         self._turn_right = TURN_RIGHT
         self._backward = BACKWARD
+        self._stop = STOP
         #DET HER ER COPILOT MÅSKE KAN VI TESTE HVAD DER ER HER. KAN VÆRE DET ER DEN KALIBREREDE VÆRDI
         #self._forward = rospy.get_param(f'/{vehicle_name}/kinematics_node/forward')
         # construct publisher
@@ -42,7 +40,7 @@ class WheelControlNode(DTROS):
         instruction = int(instruction.data)
         rate = rospy.Rate(1) #1 message every second
         if instruction == 1:
-            message = WheelsCmdStamped(vel_left=self._forward[0], vel_right=self._forward[1])
+            message = WheelsCmdStamped(vel_left=self._forward[0] , vel_right=self._forward[1])
             rospy.loginfo("f")
         elif instruction == 2:
             message = WheelsCmdStamped(vel_left=self._turn_left[0], vel_right=self._turn_left[1])
@@ -83,15 +81,17 @@ class WheelControlNode(DTROS):
         self._publisher.publish(stop)
 
     def callback(self, data):
-        if data.data == "right":
-            self._forward = (0.11,0.010)
-            print("right WE ARE IN CALLBACK")
-        elif data.data == "left":
-            self._forward = (0.10,0.095)
-            print("left WE ARE IN CALLBACK")
-        elif data.data == "no_change":
-            self._forward = FORWARD
-            print("no_change WE ARE IN CALLBACK")
+        rospy.loginfo("WE ARE IN CALLBACK")
+        print(data.data)
+        #if data.data == "right":
+        #    self._forward = (0.11,0.010)
+        #    print("right WE ARE IN CALLBACK")
+        #elif data.data == "left":
+        #    self._forward = (0.10,0.095)
+        #    print("left WE ARE IN CALLBACK")
+        #elif data.data == "no_change":
+        #    self._forward = FORWARD
+        #    print("no_change WE ARE IN CALLBACK")
 
 
 if __name__ == '__main__':
