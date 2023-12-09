@@ -8,7 +8,7 @@ def mainRed(edgepoligonRed, width):
     y2 = int(m * x2 + b)
     return x1, y1, x2, y2
 
-def mainBlue(edgepoligonBlue, width, x1, y1, x2, y2):
+def mainBlue(edgepoligonBlue, width,  hight, x1, y1, x2, y2):
         currentIndex = 0
         lowestX = float('inf')
         for index, currentEdgePoligon in enumerate(edgepoligonBlue):
@@ -20,10 +20,14 @@ def mainBlue(edgepoligonBlue, width, x1, y1, x2, y2):
                 if currentEdgePoligon.contours[i][0][0] < lowestX:
                     lowestX = currentEdgePoligon.contours[i][0][0]
                     currentIndex = index
-                currentEdgePoligon.contours[i][0][1] = currentEdgePoligon.contours[i][0][1] + width // 2
+                currentEdgePoligon.contours[i][0][1] = currentEdgePoligon.contours[i][0][1] + hight // 2
     
         theLowestContour = edgepoligonBlue[currentIndex].contours
         coefficients = fit_lineByContours(theLowestContour[:, 0, :])
+        x1 = 0
+        y1 = int(coefficients[0] * x1 + coefficients[1])
+        x2 = width - 1
+        y2 = int(coefficients[0] * x2 + coefficients[1])
         return x1, y1, x2, y2 
 
 #create a unktion that see if x and y is on the left or right side of a line

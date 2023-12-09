@@ -97,7 +97,8 @@ class CameraReaderNode(DTROS):
             return img
         #show   
         x1, y1, x2, y2 = lc.mainRed(egdepoligonRed, width)
-        mx1, my1, mx2, my2 = lc.mainBlue(egdepoligonBlue, width, x1, y1, x2, y2)
+        print(x1, y1, x2, y2)
+        mx1, my1, mx2, my2 = lc.mainBlue(egdepoligonBlue, width,height, x1, y1, x2, y2)
 
 
         cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
