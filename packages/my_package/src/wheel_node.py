@@ -4,12 +4,11 @@ import os
 import rospy
 from duckietown.dtros import DTROS, NodeType
 from duckietown_msgs.msg import WheelsCmdStamped
-import packages.my_package.src2.a_star as a_star
 from std_msgs.msg import String
 
 
-TURN_RIGHT = (0.15,0)
-FORWARD = (0.15,0.025)
+TURN_RIGHT = (0.17,0)
+FORWARD = (0.2,0.23)
 BACKWARD = (-0.2,-0.26)
 TURN_LEFT = (0,0.17)
 # r: 0 f: 1 l: 2 b: 3
@@ -36,29 +35,48 @@ class WheelControlNode(DTROS):
         # construct publisher
         self._publisher = rospy.Publisher(wheels_topic, WheelsCmdStamped, queue_size=1)
         self._subsriber = rospy.Subscriber("lane_detection_correction", String, self.callback)
+        #create a new subscriber with inger as the message type
+        self._subsriber2 = rospy.Subscriber("instruction", String, self.run)
 
-    def run(self):
+    def run(self,instruction):
+        instruction = int(instruction.data)
         rate = rospy.Rate(1) #1 message every second
-        i = 0
-        while not rospy.is_shutdown():
-            if i == len(directions):
-                rospy.loginfo("arrayed at tarked")
-                i = 0
-            if directions[i] == 1:
-                message = WheelsCmdStamped(vel_left=self._forward[0], vel_right=self._forward[1])
-                rospy.loginfo("f")
-            elif directions[i] == 2:
-                message = WheelsCmdStamped(vel_left=self._turn_left[0], vel_right=self._turn_left[1])
-                rospy.loginfo("l")
-            elif directions[i] == 3:
-                message = WheelsCmdStamped(vel_left=self._backward[0], vel_right=self._backward[1])
-                rospy.loginfo("b")
-            else:
-                message = WheelsCmdStamped(vel_left=self._turn_right[0], vel_right=self._turn_right[1])
-                rospy.loginfo("r")
-            i += 1
-            self._publisher.publish(message)
-            rate.sleep()
+        if instruction == 1:
+            message = WheelsCmdStamped(vel_left=self._forward[0], vel_right=self._forward[1])
+            rospy.loginfo("f")
+        elif instruction == 2:
+            message = WheelsCmdStamped(vel_left=self._turn_left[0], vel_right=self._turn_left[1])
+            rospy.loginfo("l")
+        elif instruction == 3:
+            message = WheelsCmdStamped(vel_left=self._backward[0], vel_right=self._backward[1])
+            rospy.loginfo("b")
+        else:
+            message = WheelsCmdStamped(vel_left=self._turn_right[0], vel_right=self._turn_right[1])
+            rospy.loginfo("r")
+        self._publisher.publish(message)
+        rate.sleep()
+        
+        # rate = rospy.Rate(1) #1 message every second
+        # i = 0
+        # while not rospy.is_shutdown():
+        #     if i == len(directions):
+        #         rospy.loginfo("arrayed at tarked")
+        #         i = 0
+        #     if directions[i] == 1:
+        #         message = WheelsCmdStamped(vel_left=self._forward[0], vel_right=self._forward[1])
+        #         rospy.loginfo("f")
+        #     elif directions[i] == 2:
+        #         message = WheelsCmdStamped(vel_left=self._turn_left[0], vel_right=self._turn_left[1])
+        #         rospy.loginfo("l")
+        #     elif directions[i] == 3:
+        #         message = WheelsCmdStamped(vel_left=self._backward[0], vel_right=self._backward[1])
+        #         rospy.loginfo("b")
+        #     else:
+        #         message = WheelsCmdStamped(vel_left=self._turn_right[0], vel_right=self._turn_right[1])
+        #         rospy.loginfo("r")
+        #     i += 1
+        #     self._publisher.publish(message)
+        #     rate.sleep()
 
     def on_shutdown(self):
         stop = WheelsCmdStamped(vel_left=0, vel_right=0)
@@ -80,6 +98,4 @@ if __name__ == '__main__':
     # create the node
     node = WheelControlNode(node_name='wheel_control_node')
     # run node
-    node.run()
-    # keep the process from terminating
     rospy.spin()

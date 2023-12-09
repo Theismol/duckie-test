@@ -13,6 +13,13 @@ from math import sqrt
 from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 
+class edgeFeature:
+    def __init__(self, x, y, color ):
+        self.x = x
+        self.y = y
+        self.color = color
+
+
 class CameraReaderNode(DTROS):
     def __init__(self, node_name):
         super(CameraReaderNode, self).__init__(node_name=node_name, node_type=NodeType.VISUALIZATION)
@@ -25,11 +32,69 @@ class CameraReaderNode(DTROS):
         self._window = "camera-reader"
         cv2.namedWindow(self._window, cv2.WINDOW_AUTOSIZE)
         self.sub = rospy.Subscriber(self._camera_topic, CompressedImage, self.callback)
+        self.pub = rospy.Publisher("lane_detection_correction", String, queue_size=1)
+
+    def check_coordinates(self,image,edges):
+        y_yellowstripes = 0
+        x_yellowstripes = 0
+
+        x_whiteline = 0
+        y_whiteline = 0
+
+        average_yellowstripes = 0
+        average_whiteline = 0
+        #divides edges into yellow and white
+        for edge in edges:
+            if edge.color[0] == 255:
+                x_yellowstripes += edge.x
+                y_yellowstripes += edge.y
+                average_yellowstripes+= 1
+            else:
+                if edge.x < 150:
+                    continue
+                x_whiteline += edge.x
+                y_whiteline += edge.y
+                average_whiteline += 1
+        if average_whiteline == 0:
+            x_whiteline = 0
+            y_whiteline = 0
+        else:
+            x_whiteline = x_whiteline/average_whiteline
+            y_whiteline = y_whiteline/average_whiteline
+        if average_yellowstripes == 0:
+            x_yellowstripes = 0
+            y_yellowstripes = 0
+        else:
+            x_yellowstripes = x_yellowstripes/average_yellowstripes
+            y_yellowstripes = y_yellowstripes/average_yellowstripes
+        _, current_middle, _ = image.shape
+        current_middle = current_middle/2
+        if (x_whiteline - current_middle) > 230:
+            print("turn right")
+            self.right = True
+            self.left = False
+            self.no_change = False
+            message = "right"
+        elif current_middle - x_yellowstripes > 250:
+            print("turn left")
+            self.left = True
+            self.right = False
+            self.no_change = False
+            message = "left"
+        else:
+            print("no change in direction needed")
+            self.no_change = True
+            self.right = False
+            self.left = False
+            message = "no_change"
+
+        self.pub.publish(message)
 
     def callback(self, msg):
         # convert JPEG bytes to CV image
         image = self._bridge.compressed_imgmsg_to_cv2(msg)
         image, edges = self.findFertures(image)
+        self.check_coordinates(image, edges)
         #check_coordinates(image, edges)
         #Display the image with the detected lines and midpoint
         cv2.imshow(self._window, image)
@@ -75,8 +140,6 @@ class CameraReaderNode(DTROS):
             cv2.drawContours(img, contours, i, color, 2)
         return img, edgesFeatures
     
-    
-    
 kmeans = pickle.load(open('/code/catkin_ws/src/<duckie-test>/packages/my_package/src/imgs/finalized_model2.sav', 'rb'))
 kmeans1 = pickle.load(open('/code/catkin_ws/src/<duckie-test>/packages/my_package/src/imgs/finalized_model.sav', 'rb'))
 centroids = kmeans.cluster_centers_
@@ -102,14 +165,9 @@ def closest_centroid(point):
             currnt_shortest_distance = distance2
     return someString
 
-#if __name__ == "__main__":
-#    node = CameraReaderNode()
-#    for i in range(len(node.images)):
-#        img = cv2.imread(node.images[i])
-#        img = cv2.imread("C:\\Users\\alexa\\sanderStuff\\duckie-test\\packages\\my_package\\src2\\imgs\\" + node.images[i])
-#        img, edgesFeatures = node.findFertures(img)
-#        cv2.imshow("img", img)
-#        cv2.waitKey(0)
-#        cv2.destroyAllWindows()
-#
+if __name__ == "__main__":
+    node = CameraReaderNode(node_name="camera_reader_node")
+    rospy.spin()
+
+
 

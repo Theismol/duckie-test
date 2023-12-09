@@ -27,8 +27,6 @@ class CameraReaderNode(DTROS):
         self.pub = rospy.Publisher("lane_detection_correction", String, queue_size=1)
 
 
-
-
     def check_coordinates(self,image,edges):
         y_yellowstripes = 0
         x_yellowstripes = 0
