@@ -14,11 +14,12 @@ from sklearn.cluster import KMeans
 from sklearn.preprocessing import StandardScaler
 
 class edgePoligon:
-    def __init__(self, x, y, color):
+    def __init__(self, x, y, color, contours):
         self.x = x
         self.y = y
         self.color = color
         self.nameColor = self.findColor()
+        self.contours = contours
 
     def findColor(self):
         if self.color == (0, 0, 255):
@@ -86,9 +87,9 @@ class CameraReaderNode(DTROS):
             cv2.circle(img, (x, y), 5, color, 2)
 
             if color == (0, 0, 255):
-                egdepoligonBlue.append(edgePoligon(x, y, color))
+                egdepoligonBlue.append(edgePoligon(x, y, color, contours[i]))
             elif color == (255, 0, 0):
-                egdepoligonRed.append(edgePoligon(x, y, color))
+                egdepoligonRed.append(edgePoligon(x, y, color, contours[i]))
             #draw the circle
             #if egdepoligonRed or egdepoligonBlue is empty return
             cv2.circle(img, (x, y), 5, color, 1)
@@ -96,9 +97,11 @@ class CameraReaderNode(DTROS):
             return img
         #show   
         x1, y1, x2, y2 = lc.mainRed(egdepoligonRed, width)
-        #mx1, my1, mx2, my2 = lc.mainBlue(egdepoligonBlue, width, x1, y1, x2, y2)
+        mx1, my1, mx2, my2 = lc.mainBlue(egdepoligonBlue, width, x1, y1, x2, y2)
+
+
         cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
-        #cv2.line(img, (mx1, my1), (mx2, my2), (0, 0, 255), 3)
+        cv2.line(img, (mx1, my1), (mx2, my2), (0, 0, 255), 3)
 
         return img
     
