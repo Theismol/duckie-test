@@ -1,8 +1,13 @@
 import numpy as np
 
+x1 = 0
+y1 = 0
+x2 = 0
+y2 = 0
 
-def mainRead(edgepoligonRed, width):
-    m, b = fit_line_through_points(egdepoligonRed)
+
+def mainRed(edgepoligonRed, width):
+    m, b = fit_line_through_points(edgepoligonRed)
     x1 = 0
     y1 = int(m * x1 + b)
     x2 = width - 1
@@ -10,7 +15,7 @@ def mainRead(edgepoligonRed, width):
     return x1, y1, x2, y2
 
 def mainBlue(edgepoligonBlue, width):
-    m_orthogonal, b_orthogonal = find_orthogonal_line(x1, y1, x2, y2, egdepoligonBlue)
+    m_orthogonal, b_orthogonal = find_orthogonal_line(x1, y1, x2, y2, edgepoligonBlue)
     mx1 = 0
     my1 = int(m_orthogonal * mx1 + b_orthogonal)
     mx2 = width - 1
