@@ -68,7 +68,6 @@ def find_orthogonal_line(edgePoligons, x1, y1, x2, y2):
     highest_index = 0
     i = 0
     for edgePoligon in blue_edgePoligons:
-        print("this is the edgepoligon: ", edgePoligon.x, edgePoligon.y)
         if getSideOfLine(x1, y1, x2, y2, edgePoligon.x, edgePoligon.y) == "left":
             #pop the edgepoligon from the list
             blue_edgePoligons.pop(i)
@@ -94,8 +93,6 @@ def find_orthogonal_line(edgePoligons, x1, y1, x2, y2):
         i += 1
 
     new_blue_edgePoligons.append(blue_edgePoligons[highest_index])
-    print(x_coordinates)
-    print(y_coordinates)
     if len(x_coordinates) == 0:
         return 0, 0
     x_center = sum(x_coordinates) / len(x_coordinates)

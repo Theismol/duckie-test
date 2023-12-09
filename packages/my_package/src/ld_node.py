@@ -40,12 +40,14 @@ class CameraReaderNode(DTROS):
         self._window = "camera-reader"
         cv2.namedWindow(self._window, cv2.WINDOW_AUTOSIZE)
         self.sub = rospy.Subscriber(self._camera_topic, CompressedImage, self.callback)
-        self.pub = rospy.Publisher("lane_detection_correction", String, queue_size=1)
+        self.pub = rospy.Publisher("laneInfo", String, queue_size=1)
 
     def callback(self, msg):
         # convert JPEG bytes to CV image
         image = self._bridge.compressed_imgmsg_to_cv2(msg)
-        image = self.findFertures(image)
+        image, left, rigt = self.findFertures(image)
+        self.pub.publish(left)
+        self.pub.publish(rigt)
         cv2.imshow(self._window, image)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             cv2.destroyAllWindows()  #Close OpenCV windows
@@ -97,14 +99,16 @@ class CameraReaderNode(DTROS):
             return img
         #show   
         x1, y1, x2, y2 = lc.mainRed(egdepoligonRed, width)
-        print(x1, y1, x2, y2)
         mx1, my1, mx2, my2 = lc.mainBlue(egdepoligonBlue, width,height, x1, y1, x2, y2)
 
 
         cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
         cv2.line(img, (mx1, my1), (mx2, my2), (0, 0, 255), 3)
+        
+        leftline = "red left " + str(x1) + "," + str(y1) + "," + str(x2) + "," + str(y2) 
+        rightline = "blue right " + str(mx1) + "," + str(my1) + "," + str(mx2) + "," + str(my2)
 
-        return img
+        return img, leftline, rightline
     
 kmeans = pickle.load(open('/code/catkin_ws/src/<duckie-test>/packages/my_package/src/imgs/finalized_model2.sav', 'rb'))
 kmeans1 = pickle.load(open('/code/catkin_ws/src/<duckie-test>/packages/my_package/src/imgs/finalized_model.sav', 'rb'))
