@@ -8,27 +8,14 @@ def mainRed(edgepoligonRed, width):
     y2 = int(m * x2 + b)
     return x1, y1, x2, y2
 
-def mainBlue(edgepoligonBlue, width,  hight, x1, y1, x2, y2):
-        currentIndex = 0
-        lowestX = float('inf')
-        for index, currentEdgePoligon in enumerate(edgepoligonBlue):
-            # find the side of the line
-            side = getSideOfLine(x1, y1, x2, y2, currentEdgePoligon.x, currentEdgePoligon.y)
-            if side == "left":
-                continue
-            for i in range(len(currentEdgePoligon.contours)):
-                if currentEdgePoligon.contours[i][0][0] < lowestX:
-                    lowestX = currentEdgePoligon.contours[i][0][0]
-                    currentIndex = index
-                currentEdgePoligon.contours[i][0][1] = currentEdgePoligon.contours[i][0][1] + hight // 2
-    
-        theLowestContour = edgepoligonBlue[currentIndex].contours
-        coefficients = fit_lineByContours(theLowestContour[:, 0, :])
-        x1 = 0
-        y1 = int(coefficients[0] * x1 + coefficients[1])
-        x2 = width - 1
-        y2 = int(coefficients[0] * x2 + coefficients[1])
-        return x1, y1, x2, y2 
+def mainBlue(countour, width):
+
+    coefficients = fit_lineByContours(countour[:, 0, :])
+    x1 = 0
+    y1 = int(coefficients[0] * x1 + coefficients[1])
+    x2 = width - 1
+    y2 = int(coefficients[0] * x2 + coefficients[1])
+    return x1, y1, x2, y2
 
 #create a unktion that see if x and y is on the left or right side of a line
 def getSideOfLine(x1, y1, x2, y2, x, y):
@@ -54,8 +41,7 @@ def fit_line_through_points(edgePoligons):
     coefficients = np.polyfit(x_coordinates, y_coordinates, 1)
 
     # Get the slope (m) and y-intercept (b)
-    m, b = coefficients
-    return m, b
+    return coefficients[0], coefficients[1]
 
 def find_orthogonal_line(edgePoligons, x1, y1, x2, y2):
     blue_edgePoligons = list(dict.fromkeys(edgePoligons))

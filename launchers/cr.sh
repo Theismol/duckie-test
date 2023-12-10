@@ -6,7 +6,7 @@ source /environment.sh
 dt-launchfile-init
 
 # launch subscriber
-rosrun my_package ld_node.py
+rosrun my_package ld_node.py 
 
 # wait for app to end
 dt-launchfile-join

@@ -14,18 +14,38 @@ class CameraReaderNode(DTROS):
         super(CameraReaderNode, self).__init__(node_name=node_name, node_type=NodeType.VISUALIZATION)
 
         self._vehicle_name = os.environ['VEHICLE_NAME']
-        cv2.namedWindow(self._window, cv2.WINDOW_AUTOSIZE)
         self.sub2 = rospy.Subscriber("laneInfo", String, self.lane_correction_callback)
 
-
+    """
+this is the msg one every new line is a new msg
+blue right 0,-182,639,442
+red left 0,546,639,-410
+blue right 0,-182,639,442
+red left 0,546,639,-410
+blue right 0,-181,639,442
+red left 0,546,639,-410
+blue right 0,-182,639,442
+red left 0,546,639,-410
+blue right 0,-182,639,442
+red left 0,546,639,-410
+blue right 0,-183,639,443
+red left 0,546,639,-410
+    """
     def lane_correction_callback(self, msg):
-        print(msg.data)
+        split_msg = msg.data.split()
+        if split_msg[0] == "blue":
+            x1 = int(split_msg[1])
+            y1 = int(split_msg[2])
+            x2 = int(split_msg[3])
+            y2 = int(split_msg[4])
+
+
 
 
 
 if __name__ == '__main__':
     # create the node
-    node = CameraReaderNode(node_name='camera_reader_node')
+    node = CameraReaderNode(node_name='lane_follower_node')
     # keep spinning
     rospy.spin()
 

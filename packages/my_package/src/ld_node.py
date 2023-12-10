@@ -45,9 +45,7 @@ class CameraReaderNode(DTROS):
     def callback(self, msg):
         # convert JPEG bytes to CV image
         image = self._bridge.compressed_imgmsg_to_cv2(msg)
-        image, left, rigt = self.findFertures(image)
-        self.pub.publish(left)
-        self.pub.publish(rigt)
+        image = self.findFertures(image)
         cv2.imshow(self._window, image)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             cv2.destroyAllWindows()  #Close OpenCV windows
@@ -94,21 +92,34 @@ class CameraReaderNode(DTROS):
                 egdepoligonRed.append(edgePoligon(x, y, color, contours[i]))
             #draw the circle
             #if egdepoligonRed or egdepoligonBlue is empty return
-            cv2.circle(img, (x, y), 5, color, 1)
-        if not egdepoligonRed or not egdepoligonBlue:
-            return img
-        #show   
-        x1, y1, x2, y2 = lc.mainRed(egdepoligonRed, width)
-        mx1, my1, mx2, my2 = lc.mainBlue(egdepoligonBlue, width,height, x1, y1, x2, y2)
 
+            cv2.circle(img, (x, y), 5, color, 1)
+        #show
+        if len(egdepoligonRed) != 0:
+            x1, y1, x2, y2 = lc.mainRed(egdepoligonRed, width)
+        else:
+            x1, y1, x2, y2 = 0, 0, 0, 0
+
+        lowestx = 100000
+        currentInt = 0
+        for index, egdepoligon in enumerate(egdepoligonBlue):
+            if lc.getSideOfLine(x1, y1, x2, y2, egdepoligon.x, egdepoligon.y) == "left" and len(egdepoligonRed) != 0:
+                continue
+            #draw the contour of the blue purple
+            rx, ry, rw, rh = cv2.boundingRect(egdepoligon.contours)
+            if rx < lowestx:
+                lowestx = rx
+                currentInt = index
+        #dreaw the contour of the blue purple
+        mx1, my1, mx2, my2 = lc.mainBlue(egdepoligonBlue[currentInt].contours, width)
+        #offset the y in mx1, my1, mx2, my2
+        my1 = my1 + height // 2
+        my2 = my2 + height // 2
 
         cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
         cv2.line(img, (mx1, my1), (mx2, my2), (0, 0, 255), 3)
-        
-        leftline = "red left " + str(x1) + "," + str(y1) + "," + str(x2) + "," + str(y2) 
-        rightline = "blue right " + str(mx1) + "," + str(my1) + "," + str(mx2) + "," + str(my2)
 
-        return img, leftline, rightline
+        return img 
     
 kmeans = pickle.load(open('/code/catkin_ws/src/<duckie-test>/packages/my_package/src/imgs/finalized_model2.sav', 'rb'))
 kmeans1 = pickle.load(open('/code/catkin_ws/src/<duckie-test>/packages/my_package/src/imgs/finalized_model.sav', 'rb'))
