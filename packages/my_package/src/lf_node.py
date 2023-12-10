@@ -8,46 +8,48 @@ from sensor_msgs.msg import CompressedImage
 import cv2
 import numpy as np
 from cv_bridge import CvBridge
+#lane correction and following:
 
-class CameraReaderNode(DTROS):
-    def __init__(self, node_name):
-        super(CameraReaderNode, self).__init__(node_name=node_name, node_type=NodeType.VISUALIZATION)
+width = 640
+height = 480
 
-        self._vehicle_name = os.environ['VEHICLE_NAME']
-        self.sub2 = rospy.Subscriber("laneInfo", String, self.lane_correction_callback)
+def main(x1, y1, x2, y2, x3, y3, x4, y4):
+    # Calculate the slope of the lines
+    redSlope = (y2 - y1) / (x2 - x1)
+    blueSlope = (y4 - y3) / (x4 - x3)
 
-    """
-this is the msg one every new line is a new msg
-blue right 0,-182,639,442
-red left 0,546,639,-410
-blue right 0,-182,639,442
-red left 0,546,639,-410
-blue right 0,-181,639,442
-red left 0,546,639,-410
-blue right 0,-182,639,442
-red left 0,546,639,-410
-blue right 0,-182,639,442
-red left 0,546,639,-410
-blue right 0,-183,639,443
-red left 0,546,639,-410
-    """
-    def lane_correction_callback(self, msg):
-        split_msg = msg.data.split()
-        if split_msg[0] == "blue":
-            x1 = int(split_msg[1])
-            y1 = int(split_msg[2])
-            x2 = int(split_msg[3])
-            y2 = int(split_msg[4])
+    x, y = find_interaction_point(x1, y1, x2, y2, x3, y3, x4, y4)
+    # Calculate the distance from the center of the image to the intersection point in x axis
+    distance = int(width / 2) - int(x)
+    print("this is the lfffff!:", x, y)
+    correctionValue = getCorrectionValue(distance, blueSlope, redSlope)
+
+    # Return the coordinates
 
 
+def find_interaction_point(x1, y1, x2, y2, x3, y3, x4, y4):
+    # Calculate the slope of the lines
+    m1 = (y2 - y1) / (x2 - x1)
+    m2 = (y4 - y3) / (x4 - x3)
+    #print the slope of the lines
+    # Calculate the y-intercepts
+    b1 = y1 - m1 * x1
+    b2 = y3 - m2 * x3
+    # Calculate the x and y coordinates of the intersection to ints
+    x = int((b2 - b1) / (m1 - m2))
+    y = int(m1 * x + b1)
 
-
-
-if __name__ == '__main__':
-    # create the node
-    node = CameraReaderNode(node_name='lane_follower_node')
-    # keep spinning
-    rospy.spin()
-
-
-
+    # Return the coordinates
+    return x, y
+def getCorrectionValue(distance, blueSlope, redSlope):
+    #is the distance positive or negative
+    print(distance)
+    if blueSlope < 1:
+        print("tis turning left")
+        return
+    elif distance < 30 and distance > -30: 
+        print("straight")
+    elif distance > 30:
+        print("right")
+    elif distance < -30:
+        print("left")

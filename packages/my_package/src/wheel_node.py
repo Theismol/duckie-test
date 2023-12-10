@@ -81,17 +81,10 @@ class WheelControlNode(DTROS):
         self._publisher.publish(stop)
 
     def callback(self, data):
-        rospy.loginfo("WE ARE IN CALLBACK")
+        rate = rospy.Rate(1) 
         print(data.data)
-        if data.data == "right":
-            self._forward = (0.11,0.010)
-            print("right WE ARE IN CALLBACK")
-        elif data.data == "left":
-            self._forward = (0.10,0.095)
-            print("left WE ARE IN CALLBACK")
-        elif data.data == "no_change":
-            self._forward = FORWARD
-            print("no_change WE ARE IN CALLBACK")
+        rate.sleep()
+
 
 
 if __name__ == '__main__':

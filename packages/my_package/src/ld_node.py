@@ -40,12 +40,13 @@ class CameraReaderNode(DTROS):
         self._window = "camera-reader"
         cv2.namedWindow(self._window, cv2.WINDOW_AUTOSIZE)
         self.sub = rospy.Subscriber(self._camera_topic, CompressedImage, self.callback)
-        self.pub = rospy.Publisher("laneInfo", String, queue_size=1)
+        self.pub = rospy.Publisher("lane_detection_correction", String, queue_size=1)
 
     def callback(self, msg):
         # convert JPEG bytes to CV image
         image = self._bridge.compressed_imgmsg_to_cv2(msg)
-        image = self.findFertures(image)
+        image, lines = self.findFertures(image)
+        self.pub.publish(str(lines))
         cv2.imshow(self._window, image)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             cv2.destroyAllWindows()  #Close OpenCV windows
@@ -82,44 +83,52 @@ class CameraReaderNode(DTROS):
             currebtPoint = np.array([[r, g, b]])
             #find the color of the point
             color = closest_centroid(currebtPoint)
-            #rgb
-            #draw the the centroid
-            cv2.circle(img, (x, y), 5, color, 2)
-
             if color == (0, 0, 255):
                 egdepoligonBlue.append(edgePoligon(x, y, color, contours[i]))
             elif color == (255, 0, 0):
                 egdepoligonRed.append(edgePoligon(x, y, color, contours[i]))
             #draw the circle
             #if egdepoligonRed or egdepoligonBlue is empty return
-
-            cv2.circle(img, (x, y), 5, color, 1)
         #show
         if len(egdepoligonRed) != 0:
             x1, y1, x2, y2 = lc.mainRed(egdepoligonRed, width)
         else:
-            x1, y1, x2, y2 = 0, 0, 0, 0
+            #can cons errors
+            #create so the line is not in the image
+            x1 = -2
+            y1 = -2
+            x2 = -2
+            y2 = -2
+
 
         lowestx = 100000
         currentInt = 0
-        for index, egdepoligon in enumerate(egdepoligonBlue):
-            if lc.getSideOfLine(x1, y1, x2, y2, egdepoligon.x, egdepoligon.y) == "left" and len(egdepoligonRed) != 0:
-                continue
-            #draw the contour of the blue purple
-            rx, ry, rw, rh = cv2.boundingRect(egdepoligon.contours)
-            if rx < lowestx:
-                lowestx = rx
-                currentInt = index
-        #dreaw the contour of the blue purple
-        mx1, my1, mx2, my2 = lc.mainBlue(egdepoligonBlue[currentInt].contours, width)
-        #offset the y in mx1, my1, mx2, my2
-        my1 = my1 + height // 2
-        my2 = my2 + height // 2
+        if len(egdepoligonBlue) > 0:
+            for index, egdepoligon in enumerate(egdepoligonBlue):
+                if lc.getSideOfLine(x1, y1, x2, y2, egdepoligon.x, egdepoligon.y) == "left" and len(egdepoligonRed) != 0:
+                    continue
+                #draw the contour of the blue purple
+                rx, ry, rw, rh = cv2.boundingRect(egdepoligon.contours)
+                if rx < lowestx:
+                    lowestx = rx
+                    currentInt = index
+            #dreaw the contour of the blue purple
+            mx1, my1, mx2, my2 = lc.mainBlue(egdepoligonBlue[currentInt].contours, width)
+            #offset the y in mx1, my1, mx2, my2
+            my1 = my1 + height // 2
+            my2 = my2 + height // 2
+        else:
+            #the width of the image
+            mx1 = width
+            my1 = width
+            mx2 = width
+            my2 = width
 
         cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
         cv2.line(img, (mx1, my1), (mx2, my2), (0, 0, 255), 3)
+        msg = x1, y1, x2, y2, mx1, my1, mx2, my2
 
-        return img 
+        return img, msg
     
 kmeans = pickle.load(open('/code/catkin_ws/src/<duckie-test>/packages/my_package/src/imgs/finalized_model2.sav', 'rb'))
 kmeans1 = pickle.load(open('/code/catkin_ws/src/<duckie-test>/packages/my_package/src/imgs/finalized_model.sav', 'rb'))
