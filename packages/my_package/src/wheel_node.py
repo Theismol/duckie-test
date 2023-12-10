@@ -5,7 +5,8 @@ import rospy
 from duckietown.dtros import DTROS, NodeType
 from duckietown_msgs.msg import WheelsCmdStamped
 from std_msgs.msg import String
-
+import lf_node as lf
+import warnings
 
 TURN_RIGHT = (0.17,0)
 FORWARD = (0.2,0.23)
@@ -14,7 +15,6 @@ TURN_LEFT = (0,0.17)
 STOP = (0,0)
 
 #directions = a_star.get_directions(a_star.astar(start_node, goal_node, a_star.graph)[0])
-
 class WheelControlNode(DTROS):
 
     def __init__(self, node_name):
@@ -23,6 +23,8 @@ class WheelControlNode(DTROS):
         # static parameters
         vehicle_name = os.environ['VEHICLE_NAME']
         wheels_topic = f"/{vehicle_name}/wheels_driver_node/wheels_cmd"
+        self.updatedeWay = (0.3,0.3)
+        self.curruentWay = (0.3,0.3)
         self._forward = FORWARD
         self._turn_left = TURN_LEFT
         self._turn_right = TURN_RIGHT
@@ -50,6 +52,7 @@ class WheelControlNode(DTROS):
             rospy.loginfo("b")
         else:
             message = WheelsCmdStamped(vel_left=self._turn_right[0], vel_right=self._turn_right[1])
+            self._turn_right[1]
             rospy.loginfo("r")
         self._publisher.publish(message)
         rate.sleep()
@@ -76,19 +79,41 @@ class WheelControlNode(DTROS):
         #     self._publisher.publish(message)
         #     rate.sleep()
 
+    def test(self):
+        while not rospy.is_shutdown():
+            rate = rospy.Rate(1) #1 message every second
+            self.updatedeWay = self.curruentWay
+            print("this is the updatede",self.updatedeWay ) 
+            message = WheelsCmdStamped(vel_left=self.updatedeWay[0], vel_right=self.curruentWay[1])
+            self._publisher.publish(message)
+            rate.sleep()
+            self.updatedeWay = self.curruentWay
+            message = WheelsCmdStamped(vel_left=self._stop[0], vel_right=self._stop[1])
+            self._publisher.publish(message)
+            rate.sleep()
+
     def on_shutdown(self):
         stop = WheelsCmdStamped(vel_left=0, vel_right=0)
         self._publisher.publish(stop)
 
     def callback(self, data):
-        rate = rospy.Rate(1) 
-        print(data.data)
-        rate.sleep()
-
+        get_data = data.data
+        #splist the date so there is only the numbers
+        split_data = get_data.split(",")
+        x1 = int(split_data[0])
+        y1 = int(split_data[1])
+        x2 = int(split_data[2])
+        y2 = int(split_data[3])
+        mx1 = int(split_data[4])
+        my1 = int(split_data[5])
+        mx2 = int(split_data[6])
+        my2 = int(split_data[7])
+        #calculate the middle of the line
+        self.curruentWay = lf.main(x1, y1, x2, y2, mx1, my1, mx2, my2, self.updatedeWay)
 
 
 if __name__ == '__main__':
     # create the node
     node = WheelControlNode(node_name='wheel_control_node')
-    # run node
+    node.test()
     rospy.spin()

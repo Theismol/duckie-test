@@ -1,15 +1,24 @@
 import numpy as np
+import warnings
+
+warnings.simplefilter(action='ignore', category=np.RankWarning)
+
 
 def mainRed(edgepoligonRed, width):
-    m, b = fit_line_through_points(edgepoligonRed)
+    coeffic = fit_line_through_points(edgepoligonRed)
+    if coeffic[0] > 3: 
+        #[ -1.1754386  431.94736842]
+        coeffic[0] = -1.1754386
+        coeffic[1] = 0.94736842
     x1 = 0
-    y1 = int(m * x1 + b)
+    y1 = int(coeffic[0] * x1 + coeffic[1])
     x2 = width - 1
-    y2 = int(m * x2 + b)
+    y2 = int(coeffic[0] * x2 + coeffic[1])
+    #get the global variables
     return x1, y1, x2, y2
 
-def mainBlue(countour, width):
 
+def mainBlue(countour, width):
     coefficients = fit_lineByContours(countour[:, 0, :])
     x1 = 0
     y1 = int(coefficients[0] * x1 + coefficients[1])
@@ -41,7 +50,7 @@ def fit_line_through_points(edgePoligons):
     coefficients = np.polyfit(x_coordinates, y_coordinates, 1)
 
     # Get the slope (m) and y-intercept (b)
-    return coefficients[0], coefficients[1]
+    return coefficients
 
 def find_orthogonal_line(edgePoligons, x1, y1, x2, y2):
     blue_edgePoligons = list(dict.fromkeys(edgePoligons))

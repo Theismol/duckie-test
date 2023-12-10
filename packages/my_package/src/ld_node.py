@@ -32,10 +32,12 @@ class CameraReaderNode(DTROS):
     def __init__(self, node_name):
         super(CameraReaderNode, self).__init__(node_name=node_name, node_type=NodeType.VISUALIZATION)
         # static parameters
+        self._redLine = []
         self._vehicle_name = os.environ['VEHICLE_NAME']
         self._camera_topic = f"/{self._vehicle_name}/camera_node/image/compressed"
         # bridge between OpenCV and ROS
         self._bridge = CvBridge()
+        self.currrentMsg = ""
         # create window
         self._window = "camera-reader"
         cv2.namedWindow(self._window, cv2.WINDOW_AUTOSIZE)
@@ -45,8 +47,7 @@ class CameraReaderNode(DTROS):
     def callback(self, msg):
         # convert JPEG bytes to CV image
         image = self._bridge.compressed_imgmsg_to_cv2(msg)
-        image, lines = self.findFertures(image)
-        self.pub.publish(str(lines))
+        image = self.findFertures(image)
         cv2.imshow(self._window, image)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             cv2.destroyAllWindows()  #Close OpenCV windows
@@ -92,6 +93,7 @@ class CameraReaderNode(DTROS):
         #show
         if len(egdepoligonRed) != 0:
             x1, y1, x2, y2 = lc.mainRed(egdepoligonRed, width)
+
         else:
             #can cons errors
             #create so the line is not in the image
@@ -99,7 +101,6 @@ class CameraReaderNode(DTROS):
             y1 = -2
             x2 = -2
             y2 = -2
-
 
         lowestx = 100000
         currentInt = 0
@@ -126,9 +127,11 @@ class CameraReaderNode(DTROS):
 
         cv2.line(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
         cv2.line(img, (mx1, my1), (mx2, my2), (0, 0, 255), 3)
-        msg = x1, y1, x2, y2, mx1, my1, mx2, my2
-
-        return img, msg
+        #msg = x1, y1, x2, y2, mx1, my1, mx2, my2
+        #turn the msg into a string
+        msg = str(x1) + "," + str(y1) + "," + str(x2) + "," + str(y2) + "," + str(mx1) + "," + str(my1) + "," + str(mx2) + "," + str(my2)
+        self.pub.publish(msg)
+        return img
     
 kmeans = pickle.load(open('/code/catkin_ws/src/<duckie-test>/packages/my_package/src/imgs/finalized_model2.sav', 'rb'))
 kmeans1 = pickle.load(open('/code/catkin_ws/src/<duckie-test>/packages/my_package/src/imgs/finalized_model.sav', 'rb'))
