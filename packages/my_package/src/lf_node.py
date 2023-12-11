@@ -14,18 +14,20 @@ width = 640
 height = 480
 
 def main(x1, y1, x2, y2, x3, y3, x4, y4, currenWay):
-    print(currenWay, "this is wat the current way is")
     # Calculate the slope of the lines
     try:
-        redSlope = (y2 - y1) / (x2 - x1)
-        blueSlope = (y4 - y3) / (x4 - x3)
+        if currenWay[0] == 0.15:
+            forward = (0.0, 0.0)
+            return forward
+        yellowSlop = (y2 - y1) / (x2 - x1)
+        whiteSlop = (y4 - y3) / (x4 - x3)
         x, y = find_interaction_point(x1, y1, x2, y2, x3, y3, x4, y4)
         # Calculate the distance from the center of the image to the intersection point in x axis
         distance = int(width / 2) - int(x)
-        forward = getCorrectionValue(distance, blueSlope, redSlope, currenWay)
+        forward = getCorrectionValue(distance, whiteSlop, yellowSlop, currenWay)
     except:
         print("-----------------except-----------------")
-        forward = (0.2, 0.55)
+        forward = (0.20, 0.35)
     return forward
 
     # Return the coordinates
@@ -46,18 +48,28 @@ def find_interaction_point(x1, y1, x2, y2, x3, y3, x4, y4):
     # Return the coordinates
     return x, y
 #FORWARD = (0.2,0.23)
-def getCorrectionValue(distance, blueSlope, redSlope, forward):
+def getCorrectionValue(distance, whiteSlop, yellowSlop, forward):
+    if whiteSlop < 0.8 and whiteSlop >-2.0:
+        print("----WHITE----",whiteSlop,"yello:", yellowSlop)
+        forward = (0.20, 0.35)
+        return forward
     if distance < 30 and distance > -30:
         print("straight")
         forward = (0.3, 0.33)
         return forward
     if distance > 30:
-        print("left turn", distance)
-        forward = forward[0] -0.07, forward[1] 
+        print("------LEFT-----", forward, distance, whiteSlop)
+        if forward[0] <0.05:
+            forward = (0.0, 0.1)
+            return forward
+        forward = forward[0]- 0.07, forward[1] 
         return forward
     if distance < -30:
-        print("right turn", distance)
-        forward = forward[0] , forward[1]- 0.07
+        if forward[1] <0.05:
+            forward = (0.1, 0.0)
+            return forward
+        print("-------RIGHT-----", forward, distance)
+        forward = forward[0] , forward[1] - 0.07
         return forward
     return forward
 
@@ -83,7 +95,3 @@ def getCorrectionValue(distance, blueSlope, redSlope, forward):
     #    print("------left -------the distance is: ", distance, "the forward is: ", forward)
     #    return forward
     #forward = (0.3, 0.33)
-
-    #return forward
-
-

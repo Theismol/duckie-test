@@ -1,12 +1,11 @@
 import numpy as np
 import warnings
-
 warnings.simplefilter(action='ignore', category=np.RankWarning)
 
 
-def mainRed(edgepoligonRed, width):
-    coeffic = fit_line_through_points(edgepoligonRed)
-    if coeffic[0] > 3: 
+def mainYellow(edgepoligon, width):
+    coeffic = fit_line_through_points(edgepoligon)
+    if coeffic[0] > 3: # if the slope is too high, set it to a lower value
         #[ -1.1754386  431.94736842]
         coeffic[0] = -1.1754386
         coeffic[1] = 0.94736842
@@ -18,7 +17,24 @@ def mainRed(edgepoligonRed, width):
     return x1, y1, x2, y2
 
 
-def mainBlue(countour, width):
+def mainRed(edgepoligon):
+    highestX = 0
+    lowestX = 100000
+    y1 = 0
+    y2 = 0
+    for egde in edgepoligon:
+        if egde.x < 50:
+            continue
+        if egde.x < lowestX:
+            lowestX = egde.x
+            y1 = egde.y
+        if egde.x > highestX:
+            highestX = egde.x
+            y2 = egde.y
+    return lowestX, y2, highestX, y1
+
+
+def mainWhite(countour, width):
     coefficients = fit_lineByContours(countour[:, 0, :])
     x1 = 0
     y1 = int(coefficients[0] * x1 + coefficients[1])
@@ -48,59 +64,6 @@ def fit_line_through_points(edgePoligons):
         y_coordinates.append(edgePoligon.y)
     # Fit a line (y = mx + b) through the points using linear regression
     coefficients = np.polyfit(x_coordinates, y_coordinates, 1)
-
     # Get the slope (m) and y-intercept (b)
     return coefficients
-
-def find_orthogonal_line(edgePoligons, x1, y1, x2, y2):
-    blue_edgePoligons = list(dict.fromkeys(edgePoligons))
-    new_blue_edgePoligons = []
-    # Find the center of the blue edge poligons
-    x_coordinates = []
-    y_coordinates = []
-    highest_y = 0
-    second_highest_y = 0
-    highest_index = 0
-    i = 0
-    for edgePoligon in blue_edgePoligons:
-        if getSideOfLine(x1, y1, x2, y2, edgePoligon.x, edgePoligon.y) == "left":
-            #pop the edgepoligon from the list
-            blue_edgePoligons.pop(i)
-            i += 1
-            continue
-        if edgePoligon.y > highest_y:
-            highest_index = i
-            y_coordinates.append(edgePoligon.y)
-            x_coordinates.append(edgePoligon.x)
-            highest_y = edgePoligon.y
-        i+=1
-    #if less than 2 edgepoligons are left, return
-    if len(blue_edgePoligons) < 2:
-        return 0, 0
-    #find the second highest y value
-    new_blue_edgePoligons.append(blue_edgePoligons[highest_index])
-    highest_index = 0
-    i = 0
-    for edgePoligon in blue_edgePoligons:
-        if edgePoligon.y > second_highest_y and edgePoligon.y < highest_y:
-            highest_index = i
-            second_highest_y = edgePoligon.y
-        i += 1
-
-    new_blue_edgePoligons.append(blue_edgePoligons[highest_index])
-    if len(x_coordinates) == 0:
-        return 0, 0
-    x_center = sum(x_coordinates) / len(x_coordinates)
-    y_center = sum(y_coordinates) / len(y_coordinates)
-
-    # Find the slope of the line through the center of the blue edge poligons
-    m, b = fit_line_through_points(new_blue_edgePoligons)
-
-    # Find the slope of the orthogonal line
-    m_orthogonal = -1 / m
-
-    # Find the y-intercept of the orthogonal line
-    b_orthogonal = y_center - m_orthogonal * x_center
-
-    return m_orthogonal, b_orthogonal
 

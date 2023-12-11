@@ -56,14 +56,16 @@ class CameraReaderNode(DTROS):
         #Display the image with the detected lines and midpoint
 
     def findFertures(self, img):
+        #create a list of egdepoligons that is empty
+        egdepoligonYellow = []
+        egdepoligonWhite = []
         egdepoligonRed = []
-        egdepoligonBlue = []
         #create a list of egdepoligons for each image
         height, width, _ = img.shape
         mask = np.zeros_like(img)
         mask[height // 2:, :] = 255
         #show the mask in a window with and height as the mask
-        gray_mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY) 
+        gray_mask = cv2.cvtColor(mask, cv2.COLOR_BGR2GRAY)
         gray_roi = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         gray_roi = cv2.bitwise_and(gray_roi, gray_roi, mask=gray_mask)
         #find the hlaf of the gray_roi 
@@ -84,29 +86,39 @@ class CameraReaderNode(DTROS):
             currebtPoint = np.array([[r, g, b]])
             #find the color of the point
             color = closest_centroid(currebtPoint)
+            #if blue then images is white
+            #add offset i contours
             if color == (0, 0, 255):
-                egdepoligonBlue.append(edgePoligon(x, y, color, contours[i]))
+                egdepoligonWhite.append(edgePoligon(x, y, color, contours[i]))
+            #if red then image is yellow
             elif color == (255, 0, 0):
+                egdepoligonYellow.append(edgePoligon(x, y, color, contours[i]))
+            elif color == (15,255,255):
                 egdepoligonRed.append(edgePoligon(x, y, color, contours[i]))
-            #draw the circle
-            #if egdepoligonRed or egdepoligonBlue is empty return
+            #if egdepoligonRed or egdepoligonWhite is empty return
         #show
-        if len(egdepoligonRed) != 0:
-            x1, y1, x2, y2 = lc.mainRed(egdepoligonRed, width)
-
+        if len(egdepoligonYellow) != 0:
+            x1, y1, x2, y2 = lc.mainYellow(egdepoligonYellow, width)
         else:
-            #can cons errors
-            #create so the line is not in the image
             x1 = -2
             y1 = -2
             x2 = -2
             y2 = -2
 
+        if len(egdepoligonRed) > 1:
+            rx1, ry1, rx2, ry2 = lc.mainRed(egdepoligonRed)
+            cv2.line(img, (rx1, ry1), (rx2, ry2), (15, 255, 255), 3)
+        else:
+            rx1 = 0
+            ry1 = 0
+            rx2 = 0
+            ry2 = 0
+
         lowestx = 100000
         currentInt = 0
-        if len(egdepoligonBlue) > 0:
-            for index, egdepoligon in enumerate(egdepoligonBlue):
-                if lc.getSideOfLine(x1, y1, x2, y2, egdepoligon.x, egdepoligon.y) == "left" and len(egdepoligonRed) != 0:
+        if len(egdepoligonWhite) > 0:
+            for index, egdepoligon in enumerate(egdepoligonWhite):
+                if lc.getSideOfLine(x1, y1, x2, y2, egdepoligon.x, egdepoligon.y) == "left" and len(egdepoligonYellow) != 0:
                     continue
                 #draw the contour of the blue purple
                 rx, ry, rw, rh = cv2.boundingRect(egdepoligon.contours)
@@ -114,10 +126,12 @@ class CameraReaderNode(DTROS):
                     lowestx = rx
                     currentInt = index
             #dreaw the contour of the blue purple
-            mx1, my1, mx2, my2 = lc.mainBlue(egdepoligonBlue[currentInt].contours, width)
+            mx1, my1, mx2, my2 = lc.mainWhite(egdepoligonWhite[currentInt].contours, width)
+
             #offset the y in mx1, my1, mx2, my2
             my1 = my1 + height // 2
             my2 = my2 + height // 2
+
         else:
             #the width of the image
             mx1 = width
@@ -129,38 +143,51 @@ class CameraReaderNode(DTROS):
         cv2.line(img, (mx1, my1), (mx2, my2), (0, 0, 255), 3)
         #msg = x1, y1, x2, y2, mx1, my1, mx2, my2
         #turn the msg into a string
-        msg = str(x1) + "," + str(y1) + "," + str(x2) + "," + str(y2) + "," + str(mx1) + "," + str(my1) + "," + str(mx2) + "," + str(my2)
+        if len(egdepoligonWhite) > 1:
+            msg = str(x1) + "," + str(y1) + "," + str(x2) + "," + str(y2) + "," + str(mx1) + "," + str(my1) + "," + str(mx2) + "," + str(my2) + "," + str(rx1) + "," + str(ry1) + "," + str(rx2) + "," + str(ry2)
+        else:
+            msg = str(x1) + "," + str(y1) + "," + str(x2) + "," + str(y2) + "," + str(mx1) + "," + str(my1) + "," + str(mx2) + "," + str(my2) 
         self.pub.publish(msg)
         return img
-    
+
+
+
 kmeans = pickle.load(open('/code/catkin_ws/src/<duckie-test>/packages/my_package/src/imgs/finalized_model2.sav', 'rb'))
 kmeans1 = pickle.load(open('/code/catkin_ws/src/<duckie-test>/packages/my_package/src/imgs/finalized_model.sav', 'rb'))
+kmeans2 = pickle.load(open('/code/catkin_ws/src/<duckie-test>/packages/my_package/src/imgs/finalized_model3.sav', 'rb'))
+
 centroids = kmeans.cluster_centers_
 centroids2 = kmeans1.cluster_centers_
+centroids3 = kmeans2.cluster_centers_
 
+#point is the current color
 def closest_centroid(point):
     first_centroid = centroids
     second_centroid = centroids2
+    third_centroid = centroids3
     currnt_shortest_distance = 100000
-    someString = (255, 0, 0)
+    currentColor = (0, 0, 0)
     for i in range(len(first_centroid)):
         #find the distance between the point and the first centroid
         distance1 = sqrt((point[0][0] - first_centroid[i][0])**2 + (point[0][1] - first_centroid[i][1])**2 + (point[0][2] - first_centroid[i][2])**2)
         #find the distance between the point and the second centroid
         distance2 = sqrt((point[0][0] - second_centroid[i][0])**2 + (point[0][1] - second_centroid[i][1])**2 + (point[0][2] - second_centroid[i][2])**2)
+        distance3 = sqrt((point[0][0] - third_centroid[i][0])**2 + (point[0][1] - third_centroid[i][1])**2 + (point[0][2] - third_centroid[i][2])**2)
         if distance1 < currnt_shortest_distance:
-            #white stripe
-            someString = (0, 0,255)
+            #white stripejj
+            currentColor = (0, 0,255)
             currnt_shortest_distance = distance1
         if distance2 < currnt_shortest_distance:
             #yellow stripe
-            someString = (255, 0,0)
+            currentColor = (255, 0,0)
             currnt_shortest_distance = distance2
-    return someString
+        if distance3 < currnt_shortest_distance:
+            #red stripe#yellow color
+            currentColor = (15,255,255)
+            currnt_shortest_distance = distance3
+    return currentColor
 
 if __name__ == "__main__":
     node = CameraReaderNode(node_name="camera_reader_node")
     rospy.spin()
-
-
 

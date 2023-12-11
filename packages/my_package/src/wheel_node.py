@@ -81,13 +81,14 @@ class WheelControlNode(DTROS):
 
     def test(self):
         while not rospy.is_shutdown():
-            rate = rospy.Rate(1) #1 message every second
+            rate = rospy.Rate(2) #1 message every second
             self.updatedeWay = self.curruentWay
-            print("this is the updatede",self.updatedeWay ) 
+            print("------Updaede-------",self.updatedeWay ) 
             message = WheelsCmdStamped(vel_left=self.updatedeWay[0], vel_right=self.curruentWay[1])
             self._publisher.publish(message)
             rate.sleep()
-            self.updatedeWay = self.curruentWay
+            rate = rospy.Rate(0.5)
+            #stop
             message = WheelsCmdStamped(vel_left=self._stop[0], vel_right=self._stop[1])
             self._publisher.publish(message)
             rate.sleep()
