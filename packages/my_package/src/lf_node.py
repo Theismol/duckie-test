@@ -13,25 +13,66 @@ from cv_bridge import CvBridge
 width = 640
 height = 480
 
-def main(x1, y1, x2, y2, x3, y3, x4, y4, currenWay):
+def main(lineList, currenWay):
+    x1 = lineList[0]
+    y1 = lineList[1]
+    x2 = lineList[2]
+    y2 = lineList[3]
+    x3 = lineList[4]
+    y3 = lineList[5]
+    x4 = lineList[6]
+    y4 = lineList[7]
+    rx1 = lineList[8]
+    ry1 = lineList[9]
+    rx2 = lineList[10]
+    ry2 = lineList[11]
+    lineColor = None
     # Calculate the slope of the lines
     try:
-        if currenWay[0] == 0.15:
-            forward = (0.0, 0.0)
-            return forward
         yellowSlop = (y2 - y1) / (x2 - x1)
         whiteSlop = (y4 - y3) / (x4 - x3)
+        if rx1 > 0:
+            currenWay, color = getCorrectionRed(rx1, ry1, rx2, ry2, currenWay, yellowSlop)
+            if color == "red":
+                return currenWay, color
         x, y = find_interaction_point(x1, y1, x2, y2, x3, y3, x4, y4)
         # Calculate the distance from the center of the image to the intersection point in x axis
         distance = int(width / 2) - int(x)
-        forward = getCorrectionValue(distance, whiteSlop, yellowSlop, currenWay)
+        forward, lineColor= getCorrectionValue(distance, whiteSlop, yellowSlop, currenWay)
     except:
         print("-----------------except-----------------")
-        forward = (0.20, 0.35)
-    return forward
+        whiteSlop = (y4 - y3) / (x4 - x3)
+        forward = (0.11, 0.3)
+        forward = setException(whiteSlop)
+    return forward, lineColor
 
     # Return the coordinates
 
+def getCorrectionRed(rx2, ry1, rx1, ry2, currenWay, yellowSlop):
+    print("-----RED-----", "rx1:", rx1, "ry1:", ry1, "rx2:", rx2, "ry2:", ry2, "yellowSlop:", yellowSlop)
+    linesColor = None
+    if ry2 > 350:
+        print("-----RED----- STOP")
+        linesColor = "red"
+    if yellowSlop < -1:
+        forward = (0.35, 0.3)
+        if rx1 > 400:
+            forward = (0.2, 0.0)
+        return forward, linesColor
+
+
+    return currenWay, linesColor
+
+
+def setException(whiteSlope):
+    print("----In Excation and WihteSlope:----", whiteSlope)
+    if whiteSlope > 2:
+        forward = (0.0, 0.2)
+        print("-----IN IF---")
+    else:
+        print("-----IN ELSE---")
+        forward = (0.0, 0.2)
+    return forward
 
 def find_interaction_point(x1, y1, x2, y2, x3, y3, x4, y4):
     # Calculate the slope of the lines
@@ -49,29 +90,39 @@ def find_interaction_point(x1, y1, x2, y2, x3, y3, x4, y4):
     return x, y
 #FORWARD = (0.2,0.23)
 def getCorrectionValue(distance, whiteSlop, yellowSlop, forward):
+    lineColor = None
     if whiteSlop < 0.8 and whiteSlop >-2.0:
-        print("----WHITE----",whiteSlop,"yello:", yellowSlop)
-        forward = (0.20, 0.35)
-        return forward
+        lineColor = "white"
+        print("----WHITE---- --left turn---",whiteSlop)
+        print("-----YELLOW-----",yellowSlop)
+        forward = (0.23, 0.35)
+        return forward, lineColor
     if distance < 30 and distance > -30:
+        lineColor = "both"
         print("straight")
-        forward = (0.3, 0.33)
-        return forward
+        forward = (0.33, 0.3)
+        return forward, lineColor
     if distance > 30:
         print("------LEFT-----", forward, distance, whiteSlop)
+        lineColor = "both"
         if forward[0] <0.05:
-            forward = (0.0, 0.1)
-            return forward
+            forward = (0.0, 0.2)
+            return forward, lineColor
         forward = forward[0]- 0.07, forward[1] 
-        return forward
+        return forward, lineColor
     if distance < -30:
-        if forward[1] <0.05:
-            forward = (0.1, 0.0)
-            return forward
         print("-------RIGHT-----", forward, distance)
+        lineColor = "both"
+        if forward[0] == 0.23:
+            forward = (0.25, 0.0)
+            return forward, lineColor
+        if forward[0]<0.05:
+            forward = (0.15, 0.0)
+            return forward, lineColor
         forward = forward[0] , forward[1] - 0.07
-        return forward
-    return forward
+        print("-------IN RIGHT-----", forward, distance)
+        return forward, lineColor
+    return forward, lineColor
 
     #if blueSlope < 1:
     #    print("Left turn", distance)

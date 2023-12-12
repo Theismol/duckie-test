@@ -109,10 +109,10 @@ class CameraReaderNode(DTROS):
             rx1, ry1, rx2, ry2 = lc.mainRed(egdepoligonRed)
             cv2.line(img, (rx1, ry1), (rx2, ry2), (15, 255, 255), 3)
         else:
-            rx1 = 0
-            ry1 = 0
-            rx2 = 0
-            ry2 = 0
+            rx1 = -1
+            ry1 = -1
+            rx2 = -1
+            ry2 = -1
 
         lowestx = 100000
         currentInt = 0
@@ -143,10 +143,7 @@ class CameraReaderNode(DTROS):
         cv2.line(img, (mx1, my1), (mx2, my2), (0, 0, 255), 3)
         #msg = x1, y1, x2, y2, mx1, my1, mx2, my2
         #turn the msg into a string
-        if len(egdepoligonWhite) > 1:
-            msg = str(x1) + "," + str(y1) + "," + str(x2) + "," + str(y2) + "," + str(mx1) + "," + str(my1) + "," + str(mx2) + "," + str(my2) + "," + str(rx1) + "," + str(ry1) + "," + str(rx2) + "," + str(ry2)
-        else:
-            msg = str(x1) + "," + str(y1) + "," + str(x2) + "," + str(y2) + "," + str(mx1) + "," + str(my1) + "," + str(mx2) + "," + str(my2) 
+        msg = str(x1) + "," + str(y1) + "," + str(x2) + "," + str(y2) + "," + str(mx1) + "," + str(my1) + "," + str(mx2) + "," + str(my2) + "," + str(rx1) + "," + str(ry1) + "," + str(rx2) + "," + str(ry2)
         self.pub.publish(msg)
         return img
 

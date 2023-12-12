@@ -31,7 +31,8 @@ def mainRed(edgepoligon):
         if egde.x > highestX:
             highestX = egde.x
             y2 = egde.y
-    return lowestX, y2, highestX, y1
+
+    return highestX, y2, lowestX, y1
 
 
 def mainWhite(countour, width):
