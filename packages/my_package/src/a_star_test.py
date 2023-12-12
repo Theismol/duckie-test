@@ -56,33 +56,52 @@ def heuristic(node, goal):
     return abs(node[0] - goal[0]) + abs(node[1] - goal[1])
 
 
-# def get_directions(path):
-#     directions = []
-#     directions_numbers = []
-#     for i in range(len(path) - 1):
-#         current_node = path[i]
-#         next_node = path[i + 1]
-#         if next_node[0] > current_node[0]:
-#             directions.append('down')
-#         elif next_node[0] < current_node[0]:
-#             directions.append('up')
-#         elif next_node[1] > current_node[1]:
-#             directions.append('right')
-#         elif next_node[1] < current_node[1]:
-#             directions.append('left')
-#     current_direction = directions[0]
-#     for direction in directions:
-#         if direction == current_direction:
-#             directions_numbers.append(1)
-#         elif direction == "up" and current_direction == "right" or direction == "right" and current_direction == "down" or direction == "down" and current_direction == "left" or direction == "left" and current_direction == "up":
-#             directions_numbers.append(2)
-#             directions_numbers.append(1)
-#             current_direction=direction
-#         elif direction == "up" and current_direction == "left" or direction == "left" and current_direction == "down" or direction == "down" and current_direction == "right" or direction == "right" and current_direction == "up":
-#             directions_numbers.append(0)
-#             directions_numbers.append(1)
-#             current_direction=direction
-#     return directions_numbers
+def get_directions(path):
+    directions = []
+    directions_numbers = []
+    directions_dict = {}
+    for i in range(len(path) - 1):
+     current_node = path[i]
+     next_node = path[i + 1]
+     if next_node[0] > current_node[0]:
+         directions.append('down')
+     elif next_node[0] < current_node[0]:
+         directions.append('up')
+     elif next_node[1] > current_node[1]:
+         directions.append('right')
+     elif next_node[1] < current_node[1]:
+         directions.append('left')
+    current_direction = directions[0]
+    for direction in directions:
+        if direction == current_direction:
+            directions_numbers.append("f")
+        elif direction == "up" and current_direction == "right" or direction == "right" and current_direction == "down" or direction == "down" and current_direction == "left" or direction == "left" and current_direction == "up":
+            directions_numbers.append("l")
+            current_direction=direction
+        elif direction == "up" and current_direction == "left" or direction == "left" and current_direction == "down" or direction == "down" and current_direction == "right" or direction == "right" and current_direction == "up":
+            directions_numbers.append("r")
+            current_direction=direction
+    for i in range(len(path)-1):
+        directions_dict[path[i]] = directions_numbers[i]
+    return directions_dict
+
+def find_intersections(path, graph):
+    in_intersection_list = []
+    start_intersection_list = []
+    new_path = {}
+    for node, weight in graph.items():
+        if (len(graph[node].items()) > 1 or weight == 20) and node in path:
+            in_intersection_list.append(node)
+            print(node)
+    for node in graph:
+        if graph[node] and list(graph[node].keys())[0] in in_intersection_list and node not in in_intersection_list and node in path:
+            print(node)
+            start_intersection_list.append(node)
+    for node, direction in path.items():
+        if node in start_intersection_list or node in in_intersection_list:
+            new_path[node] = direction
+    return new_path
+
 
 def get_instructions(path, graph):
     instructions = []
@@ -333,6 +352,8 @@ if __name__ == '__main__':
         print("Total cost:", cost)
     else:
         print("No path found")
-    print(get_instructions(path, graph))
+    directions = get_directions(path)
+    print(directions)
+    print(find_intersections(directions, graph))
 
 # Create an image to visualize the maze and the path
