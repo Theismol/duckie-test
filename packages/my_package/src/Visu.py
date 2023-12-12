@@ -1,6 +1,6 @@
 import heapq
-
-
+import matplotlib.pyplot as plt
+import networkx as nx
 
 def astar(start, goal, graph):
     open_set = {}
@@ -54,46 +54,9 @@ def heuristic(node, goal):
     return abs(node[0] - goal[0]) + abs(node[1] - goal[1])
 
 
-def get_directions(path):
-    directions = []
-    directions_numbers = []
-    for i in range(len(path) - 1):
-        current_node = path[i]
-        next_node = path[i + 1]
-        if next_node[0] > current_node[0]:
-            directions.append('down')
-        elif next_node[0] < current_node[0]:
-            directions.append('up')
-        elif next_node[1] > current_node[1]:
-            directions.append('right')
-        elif next_node[1] < current_node[1]:
-            directions.append('left')
-    current_direction = directions[0]
-    for direction in directions:
-        if direction == current_direction:
-            directions_numbers.append(1)
-        elif direction == "up" and current_direction == "right" or direction == "right" and current_direction == "down" or direction == "down" and current_direction == "left" or direction == "left" and current_direction == "up":
-            directions_numbers.append(2)
-            directions_numbers.append(1)
-            current_direction=direction
-        elif direction == "up" and current_direction == "left" or direction == "left" and current_direction == "down" or direction == "down" and current_direction == "right" or direction == "right" and current_direction == "up":
-            directions_numbers.append(0)
-            directions_numbers.append(1)
-            current_direction=direction
-    return directions_numbers
 
 
-
-
-
-'''def calculate_cost_of_path(path, graph):
-    cost = 0
-    for i in range(len(path) - 1):
-        cost += graph[path[i]][path[i + 1]]
-    return cost
-'''
-
-
+# Add functionality to visualize A* algorithm step by step
 
 graph = {
     (0, 0): {},
@@ -260,7 +223,7 @@ graph = {
     (10, 1): {},
     (10, 2): {(11,2):1},
     (10, 3): {(9,3):1},
-    (10, 4): {(10,3):1,(11,4):20},
+    (10, 4): {(10,3):1,(11,4):1},
     (10, 5): {(9,5):1,(10,4):20},
     (10, 6): {(10,5):1},
     (10, 7): {(10,6):1},
@@ -290,19 +253,83 @@ graph = {
     (11, 15): {}
 }
 
+start_node = (7, 0)
+goal_node = (0, 9)
+
+G = nx.DiGraph()
+
+for node, neighbors in graph.items():
+    G.add_node(node)
+    for neighbor, weight in neighbors.items():
+        G.add_edge(node, neighbor, weight=weight)  # Add weight as an attribute to edges
+
+# Draw the graph
+pos = {node: (node[1], -node[0]) for node in G.nodes()}  # Adjust coordinates for visualization
+
+plt.figure(figsize=(8, 8))
+nx.draw_networkx(G, pos, with_labels=False, node_color='white', node_size=500, font_size=10, font_color='black')
+
+# Mark the start and goal nodes
+start_color = 'green'
+goal_color = 'green'
+node_colors = ['black' if node not in (start_node, goal_node) else start_color if node == start_node else goal_color for node in G.nodes()]
+nx.draw_networkx_nodes(G, pos, node_color=node_colors, node_size=500)
+
+# Add edge labels
+edge_labels = {(edge[0], edge[1]): attrs['weight'] for edge, attrs in G.edges.items()}
+nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color='red')
+
+plt.axis('off')
+plt.show()
+
+def visualize_astar_step_by_step():
+    # Initialize variables needed for step-by-step visualization
+    path, _ = astar(start_node, goal_node, graph)
+    current_step = 0
+    explored_nodes = set()
+    current_path = []
+
+    def on_key(event):
+        nonlocal current_step
+        if event.key == 'h':
+            nonlocal path, current_step, explored_nodes, current_path
+
+            if current_step < len(path):
+                plt.figure(figsize=(8, 8))
+
+                # Draw the graph
+                nx.draw_networkx(G, pos, with_labels=False, node_color='white', node_size=500, font_size=10, font_color='black')
+                nx.draw_networkx_nodes(G, pos, node_color=node_colors, node_size=500)
+                nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color='red')
+
+                # Highlight the current step of the path
+                filtered_path = path[:current_step + 1]
+                path_edges = [(filtered_path[i], filtered_path[i + 1]) for i in range(len(filtered_path) - 1)]
+                nx.draw_networkx_edges(G, pos, edgelist=path_edges, edge_color='green', width=2, arrowsize=20)
+
+                # Highlight the current node being explored
+                current_node = path[current_step]
+                nx.draw_networkx_nodes(G, pos, nodelist=[current_node], node_color='yellow', node_size=500)
+
+                # Update current step for the next keypress
+                current_step += 1
+
+                # Display the updated visualization
+                plt.axis('off')
+                plt.show()
+
+    # Create initial visualization
+    plt.figure(figsize=(8, 8))
+    nx.draw_networkx(G, pos, with_labels=False, node_color='white', node_size=500, font_size=10, font_color='black')
+    nx.draw_networkx_nodes(G, pos, node_color=node_colors, node_size=500)
+    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, font_color='red')
+    plt.axis('off')
+    plt.show()
+
+    # Attach key event listener
+    plt.gcf().canvas.mpl_connect('key_press_event', on_key)
+    plt.show()
 
 
-# Example start and goal nodes
-if __name__ == '__main__':
-    start_node = (10, 6)
-    goal_node = (10, 2)
-
-    path, cost = astar(start_node, goal_node, graph)
-    if path:
-        print("Path found:", path)
-        print("Total cost:", cost)
-    else:
-        print("No path found")
-    print(get_directions(path))
-
-# Create an image to visualize the maze and the path
+# Call the function to start step-by-step visualization on 'h' key press
+visualize_astar_step_by_step()
