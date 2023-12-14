@@ -48,7 +48,6 @@ def astar(start, goal, graph):
 
 # Rest of your code remains the same
 
-
 def heuristic(node, goal):
     # In this example, we'll use the Manhattan distance as our heuristic
     return abs(node[0] - goal[0]) + abs(node[1] - goal[1])
@@ -90,10 +89,8 @@ def find_intersections(path, graph):
     for node, weight in graph.items():
         if (len(graph[node].items()) > 1 or weight == 20) and node in path:
             in_intersection_list.append(node)
-            print(node)
     for node in graph:
         if graph[node] and list(graph[node].keys())[0] in in_intersection_list and node not in in_intersection_list and node in path:
-            print(node)
             start_intersection_list.append(node)
     for node, direction in path.items():
         if node in start_intersection_list or node in in_intersection_list:
@@ -351,7 +348,6 @@ def getRoad():
     #print(directions)
     directions = find_intersections(directions, graph)
     return directions
-
 
 # Example start and goal nodes
 if __name__ == '__main__':

@@ -66,7 +66,7 @@ def getCorrectionRed(rx1, ry1, rx2, ry2, currenWay, yellowSlop, x1, x2):
     try:
         redSlop = (ry2 - ry1) / (rx2 - rx1)
         print("-------slop of red line-------", redSlop)
-        if redSlop > -1.5 and redSlop < 0.0:
+        if redSlop > -1.5 and redSlop <-0.15:
             #print("----------RED SLOP----------")
             forward = (0.0, 0.0)
             return forward, linesColor
@@ -112,9 +112,13 @@ def getCorrectionValue(distance, whiteSlop, yellowSlop, forward, y1, y2):
         forward = (0.23, 0.35)
         return forward, lineColor
     if distance < 30 and distance > -30:
+        if yellowSlop < -8:
+            forward = (0.23, 0.05)
+            print("-----Straight-----","----But YELLOW---------",yellowSlop)
+            return forward, lineColor
         lineColor = "both"
         print("straight")
-        forward = (0.33, 0.3)
+        forward = (0.33, 0.33)
         return forward, lineColor
     if distance > 30:
         print("------LEFT-----", forward, distance, whiteSlop)

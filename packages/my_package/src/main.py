@@ -2,11 +2,12 @@
 import a_star as astar
 
 
-def main(lsitOfDirections):
+def main():
     directions = astar.getRoad()
     print(directions)
     print("------A*------")
     splt = str(directions).split(",")
+    print(splt)
     #remove curly braces
     listOfDirections = []
     for index, item in enumerate(splt):
@@ -17,7 +18,8 @@ def main(lsitOfDirections):
     return listOfDirections
 
 listOfDirections = []
-listOfDirections = main(listOfDirections)
+listOfDirections = main()
+print(listOfDirections)
 
 def getDirections():
     return listOfDirections[0]
