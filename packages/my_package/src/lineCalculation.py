@@ -3,40 +3,40 @@ import warnings
 warnings.simplefilter(action='ignore', category=np.RankWarning)
 
 
-def mainYellow(edgepoligon, width):
-    coeffic = fit_line_through_points(edgepoligon)
-    if coeffic[0] > 3: # if the slope is too high, set it to a lower value
+def main_yellow(edge_polygon, width):
+    coefficients = fit_line_through_points(edge_polygon)
+    if coefficients[0] > 3: # if the slope is too high, set it to a lower value
         #[ -1.1754386  431.94736842]
-        coeffic[0] = -1.1754386
-        coeffic[1] = 0.94736842
+        coefficients[0] = -1.1754386
+        coefficients[1] = 0.94736842
     x1 = 0
-    y1 = int(coeffic[0] * x1 + coeffic[1])
+    y1 = int(coefficients[0] * x1 + coefficients[1])
     x2 = width - 1
-    y2 = int(coeffic[0] * x2 + coeffic[1])
+    y2 = int(coefficients[0] * x2 + coefficients[1])
     #get the global variables
     return x1, y1, x2, y2
 
 
-def mainRed(edgepoligon):
-    highestX = 0
-    lowestX = 100000
+def main_red(edge_polygon):
+    highest_x = 0
+    lowest_x = 100000
     y1 = 0
     y2 = 0
-    for egde in edgepoligon:
-        if egde.x < 50:
+    for edge in edge_polygon:
+        if edge.x < 50:
             continue
-        if egde.x < lowestX:
-            lowestX = egde.x
-            y1 = egde.y
-        if egde.x > highestX:
-            highestX = egde.x
-            y2 = egde.y
+        if edge.x < lowest_x:
+            lowest_x = edge.x
+            y1 = edge.y
+        if edge.x > highest_x:
+            highest_x = edge.x
+            y2 = edge.y
 
-    return highestX, y2, lowestX, y1
+    return highest_x, y2, lowest_x, y1
 
 
-def mainWhite(countour, width):
-    coefficients = fit_lineByContours(countour[:, 0, :])
+def main_white(countour, width):
+    coefficients = fit_line_by_contours(countour[:, 0, :])
     x1 = 0
     y1 = int(coefficients[0] * x1 + coefficients[1])
     x2 = width - 1
@@ -44,13 +44,13 @@ def mainWhite(countour, width):
     return x1, y1, x2, y2
 
 #create a unktion that see if x and y is on the left or right side of a line
-def getSideOfLine(x1, y1, x2, y2, x, y):
+def get_side_of_line(x1, y1, x2, y2, x, y):
     if (x2 - x1) * (y - y1) - (y2 - y1) * (x - x1) > 0:
         return "right"
     else:
         return "left"
 
-def fit_lineByContours(points):
+def fit_line_by_contours(points):
     x_coordinates, y_coordinates = zip(*points)
     coefficients = np.polyfit(x_coordinates, y_coordinates, 1)
     return coefficients

@@ -11,15 +11,15 @@ import numpy as np
 from cv_bridge import CvBridge
 from math import sqrt
 
-class edgePoligon:
+class EdgePolygon:
     def __init__(self, x, y, color, contours):
         self.x = x
         self.y = y
         self.color = color
-        self.nameColor = self.findColor()
+        self.nameColor = self.find_color()
         self.contours = contours
 
-    def findColor(self):
+    def find_color(self):
         if self.color == (0, 0, 255):
             return "red"
         elif self.color == (255, 0, 0):
@@ -35,7 +35,7 @@ class CameraReaderNode(DTROS):
         self._camera_topic = f"/{self._vehicle_name}/camera_node/image/compressed"
         # bridge between OpenCV and ROS
         self._bridge = CvBridge()
-        self.currrentMsg = ""
+        self.current_msg = ""
         # create window
         self._window = "camera-reader"
         self.sub = rospy.Subscriber(self._camera_topic, CompressedImage, self.callback)
@@ -44,7 +44,7 @@ class CameraReaderNode(DTROS):
     def callback(self, msg):
         # convert JPEG bytes to CV image
         image = self._bridge.compressed_imgmsg_to_cv2(msg)
-        image = self.findFertures(image)
+        image = self.find_features(image)
         #create a http server with the image and and updateit
 
         cv2.imshow(self._window, image)
@@ -54,11 +54,11 @@ class CameraReaderNode(DTROS):
        #check_coordinates(image, edges)
         #Display the image with the detected lines and midpoint
 
-    def findFertures(self, img):
+    def find_features(self, img):
         #create a list of egdepoligons that is empty
-        egdepoligonYellow = []
-        egdepoligonWhite = []
-        egdepoligonRed = []
+        edge_polygon_yellow = []
+        edge_polygon_white = []
+        edge_polygon_red = []
         #create a list of egdepoligons for each image
         height, width, _ = img.shape
         mask = np.zeros_like(img)
@@ -82,30 +82,30 @@ class CameraReaderNode(DTROS):
             y = y + height // 2
             b, g, r = img[y, x]
             #r g b as np array
-            currebtPoint = np.array([[r, g, b]])
+            current_point = np.array([[r, g, b]])
             #find the color of the point
-            color = closest_centroid(currebtPoint)
+            color = closest_centroid(current_point)
             #if blue then images is white
             #add offset i contours
             if color == (0, 0, 255):
-                egdepoligonWhite.append(edgePoligon(x, y, color, contours[i]))
+                edge_polygon_white.append(EdgePolygon(x, y, color, contours[i]))
             #if red then image is yellow
             elif color == (255, 0, 0):
-                egdepoligonYellow.append(edgePoligon(x, y, color, contours[i]))
+                edge_polygon_yellow.append(EdgePolygon(x, y, color, contours[i]))
             elif color == (15,255,255):
-                egdepoligonRed.append(edgePoligon(x, y, color, contours[i]))
-            #if egdepoligonRed or egdepoligonWhite is empty return
+                edge_polygon_red.append(EdgePolygon(x, y, color, contours[i]))
+            #if edge_polygon_red or edge_polygon_white is empty return
         #show
-        if len(egdepoligonYellow) != 0:
-            x1, y1, x2, y2 = lc.mainYellow(egdepoligonYellow, width)
+        if len(edge_polygon_yellow) != 0:
+            x1, y1, x2, y2 = lc.main_yellow(edge_polygon_yellow, width)
         else:
             x1 = -2
             y1 = -2
             x2 = -2
             y2 = -2
 
-        if len(egdepoligonRed) > 1:
-            rx1, ry1, rx2, ry2 = lc.mainRed(egdepoligonRed)
+        if len(edge_polygon_red) > 1:
+            rx1, ry1, rx2, ry2 = lc.main_red(edge_polygon_red)
             cv2.line(img, (rx1, ry1), (rx2, ry2), (15, 255, 255), 3)
         else:
             rx1 = -1
@@ -113,19 +113,19 @@ class CameraReaderNode(DTROS):
             rx2 = -1
             ry2 = -1
 
-        lowestx = 100000
-        currentInt = 0
-        if len(egdepoligonWhite) > 0:
-            for index, egdepoligon in enumerate(egdepoligonWhite):
-                if lc.getSideOfLine(x1, y1, x2, y2, egdepoligon.x, egdepoligon.y) == "left" and len(egdepoligonYellow) != 0:
+        lowest_x = 100000
+        current_int = 0
+        if len(edge_polygon_white) > 0:
+            for index, egdepoligon in enumerate(edge_polygon_white):
+                if lc.get_side_of_line(x1, y1, x2, y2, egdepoligon.x, egdepoligon.y) == "left" and len(edge_polygon_yellow) != 0:
                     continue
                 #draw the contour of the blue purple
                 rx, ry, rw, rh = cv2.boundingRect(egdepoligon.contours)
-                if rx < lowestx:
-                    lowestx = rx
-                    currentInt = index
+                if rx < lowest_x:
+                    lowest_x = rx
+                    current_int = index
             #dreaw the contour of the blue purple
-            mx1, my1, mx2, my2 = lc.mainWhite(egdepoligonWhite[currentInt].contours, width)
+            mx1, my1, mx2, my2 = lc.main_white(edge_polygon_white[current_int].contours, width)
 
             #offset the y in mx1, my1, mx2, my2
             my1 = my1 + height // 2
@@ -150,33 +150,33 @@ class CameraReaderNode(DTROS):
 
 #point is the current color
 def closest_centroid(point):
-    secondList = [[191.62790698, 210.06976744,  73.09302326], [175.10843373, 192.15662651,  44.60240964], [176.20930233, 192.58139535,  11.76744186]]
-    firstList = [168.85185185, 204.81481481, 184.66666667], [ 54.94444444,  78.16666667,  43.97222222], [109.10526316, 141.36842105, 117.84210526]
-    thirdList = [199.30232558,  83.74418605,  73.37209302], [233.70588235, 103.76470588,  95.70588235], [237.7173913 ,  83.43478261,  75.95652174]
-    first_centroid = firstList
-    second_centroid = secondList
-    third_centroid = thirdList
-    currnt_shortest_distance = 100000
-    currentColor = (0, 0, 0)
+    second_list = [[191.62790698, 210.06976744,  73.09302326], [175.10843373, 192.15662651,  44.60240964], [176.20930233, 192.58139535,  11.76744186]]
+    first_list = [168.85185185, 204.81481481, 184.66666667], [ 54.94444444,  78.16666667,  43.97222222], [109.10526316, 141.36842105, 117.84210526]
+    third_list = [199.30232558,  83.74418605,  73.37209302], [233.70588235, 103.76470588,  95.70588235], [237.7173913 ,  83.43478261,  75.95652174]
+    first_centroid = first_list
+    second_centroid = second_list
+    third_centroid = third_list
+    current_shortest_distance = 100000
+    current_color = (0, 0, 0)
     for i in range(len(first_centroid)):
         #find the distance between the point and the first centroid
         distance1 = sqrt((point[0][0] - first_centroid[i][0])**2 + (point[0][1] - first_centroid[i][1])**2 + (point[0][2] - first_centroid[i][2])**2)
         #find the distance between the point and the second centroid
         distance2 = sqrt((point[0][0] - second_centroid[i][0])**2 + (point[0][1] - second_centroid[i][1])**2 + (point[0][2] - second_centroid[i][2])**2)
         distance3 = sqrt((point[0][0] - third_centroid[i][0])**2 + (point[0][1] - third_centroid[i][1])**2 + (point[0][2] - third_centroid[i][2])**2)
-        if distance1 < currnt_shortest_distance:
+        if distance1 < current_shortest_distance:
             #white stripejj
-            currentColor = (0, 0,255)
-            currnt_shortest_distance = distance1
-        if distance2 < currnt_shortest_distance:
+            current_color = (0, 0,255)
+            current_shortest_distance = distance1
+        if distance2 < current_shortest_distance:
             #yellow stripe
-            currentColor = (255, 0,0)
-            currnt_shortest_distance = distance2
-        if distance3 < currnt_shortest_distance:
+            current_color = (255, 0,0)
+            current_shortest_distance = distance2
+        if distance3 < current_shortest_distance:
             #red stripe#yellow color
-            currentColor = (15,255,255)
-            currnt_shortest_distance = distance3
-    return currentColor
+            current_color = (15,255,255)
+            current_shortest_distance = distance3
+    return current_color
 
 if __name__ == "__main__":
     node = CameraReaderNode(node_name="camera_reader_node")

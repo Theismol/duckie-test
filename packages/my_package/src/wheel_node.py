@@ -22,15 +22,15 @@ class WheelControlNode(DTROS):
         # static parameters
         vehicle_name = os.environ['VEHICLE_NAME']
         wheels_topic = f"/{vehicle_name}/wheels_driver_node/wheels_cmd"
-        self.updatedeWay = (0.30,0.33)
-        self.curruentWay = (0.30,0.33)
+        self.updated_way = (0.30, 0.33)
+        self.current_way = (0.30, 0.33)
         self.intersection = False
         self._stop = STOP
         #DET HER ER COPILOT MÅSKE KAN VI TESTE HVAD DER ER HER. KAN VÆRE DET ER DEN KALIBREREDE VÆRDI
         #self._forward = rospy.get_param(f'/{vehicle_name}/kinematics_node/forward')
         # construct publisher
         self._publisher = rospy.Publisher(wheels_topic, WheelsCmdStamped, queue_size=1)
-        self._subsriber = rospy.Subscriber("lane_detection_correction", String, self.callback)
+        self._subscriber = rospy.Subscriber("lane_detection_correction", String, self.callback)
 
     def test(self):
         while not rospy.is_shutdown():
@@ -38,15 +38,15 @@ class WheelControlNode(DTROS):
                 self.intersectionGet()
                 continue
             rate = rospy.Rate(2) #1 message every second__
-            self.updatedeWay = self.curruentWay
+            self.updated_way = self.current_way
             print("\n")
-            print("------Updaede-------",self.updatedeWay ) 
+            print("------Updated instruction-------", self.updated_way)
             print("\n")
-            message = WheelsCmdStamped(vel_left=self.updatedeWay[0], vel_right=self.curruentWay[1])
+            message = WheelsCmdStamped(vel_left=self.updated_way[0], vel_right=self.current_way[1])
             self._publisher.publish(message)
             rate.sleep()
             rate = rospy.Rate(0.5)
-            self.updatedeWay = self.curruentWay
+            self.updated_way = self.current_way
             message = WheelsCmdStamped(vel_left=0, vel_right=0)
             self._publisher.publish(message)
             rate.sleep()
@@ -72,7 +72,7 @@ class WheelControlNode(DTROS):
         index = 0
         if self.intersection == False:
             for i in range(10):
-                wayAndColor = lf.main(pontsOfLines, self.updatedeWay)
+                wayAndColor = lf.main(pontsOfLines, self.updated_way)
                 listOfWays.append(wayAndColor)
                 index += 1
                 
@@ -81,17 +81,17 @@ class WheelControlNode(DTROS):
                     self.intersection = True
                     break
                     #start intersection: 
-            self.curruentWay = listOfWays[0][0]
+            self.current_way = listOfWays[0][0]
 
     def intersectionGet(self):
-        if main.getDirections() == "r":
-            main.removeFirst()
-            self.updatedeWay = (0.35,0.0)
-        elif main.getDirections() == "l":
-            main.removeFirst()
+        if main.get_directions() == "r":
+            main.remove_first()
+            self.updated_way = (0.35, 0.0)
+        elif main.get_directions() == "l":
+            main.remove_first()
             message = WheelsCmdStamped(vel_left=0.4, vel_right=0.4)
             self._publisher.publish(message)
-            self.updatedeWay = (0.0,0.35)
+            self.updated_way = (0.0, 0.35)
         print("------Intersection-------")
         rate = rospy.Rate(1) #1 message every second
         rate.sleep()
@@ -101,7 +101,7 @@ class WheelControlNode(DTROS):
         message = WheelsCmdStamped(vel_left=0, vel_right=0)
         self._publisher.publish(message)
         rate.sleep()
-        message = WheelsCmdStamped(vel_left=self.updatedeWay[0], vel_right=self.updatedeWay[1])
+        message = WheelsCmdStamped(vel_left=self.updated_way[0], vel_right=self.updated_way[1])
         self._publisher.publish(message)
         rate.sleep()
         self.intersection = False

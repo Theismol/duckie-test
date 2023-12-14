@@ -9,20 +9,19 @@ def main():
     splt = str(directions).split(",")
     print(splt)
     #remove curly braces
-    listOfDirections = []
+    list_of_directions = []
     for index, item in enumerate(splt):
         if index % 2 != 0:
             if item[6] == "f":
                 continue
-            listOfDirections.append(item[6])
-    return listOfDirections
+            list_of_directions.append(item[6])
+    return list_of_directions
 
-listOfDirections = []
-listOfDirections = main()
-print(listOfDirections)
+list_of_directions = main()
+print(list_of_directions)
 
-def getDirections():
-    return listOfDirections[0]
+def get_directions():
+    return list_of_directions[0]
 
-def removeFirst():
-    listOfDirections.pop(0)
+def remove_first():
+    list_of_directions.pop(0)
