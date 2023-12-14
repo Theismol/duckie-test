@@ -344,7 +344,7 @@ graph = {
 # Example start and goal nodes
 if __name__ == '__main__':
     start_node = (10, 6)
-    goal_node = (6, 0)
+    goal_node = (1, 6)
 
     path, cost = astar(start_node, goal_node, graph)
     if path:
@@ -352,8 +352,8 @@ if __name__ == '__main__':
         print("Total cost:", cost)
     else:
         print("No path found")
-    directions = get_directions(path)
-    print(directions)
-    print(find_intersections(directions, graph))
+    # directions = get_directions(path)
+    # print(directions)
+    # print(find_intersections(directions, graph))
 
 # Create an image to visualize the maze and the path
