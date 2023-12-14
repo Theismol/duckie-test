@@ -10,8 +10,6 @@ import cv2
 import numpy as np
 from cv_bridge import CvBridge
 from math import sqrt
-from sklearn.cluster import KMeans
-from sklearn.preprocessing import StandardScaler
 
 class edgePoligon:
     def __init__(self, x, y, color, contours):
@@ -40,7 +38,6 @@ class CameraReaderNode(DTROS):
         self.currrentMsg = ""
         # create window
         self._window = "camera-reader"
-        cv2.namedWindow(self._window, cv2.WINDOW_AUTOSIZE)
         self.sub = rospy.Subscriber(self._camera_topic, CompressedImage, self.callback)
         self.pub = rospy.Publisher("lane_detection_correction", String, queue_size=1)
 
@@ -48,11 +45,13 @@ class CameraReaderNode(DTROS):
         # convert JPEG bytes to CV image
         image = self._bridge.compressed_imgmsg_to_cv2(msg)
         image = self.findFertures(image)
+        #create a http server with the image and and updateit
+
         cv2.imshow(self._window, image)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             cv2.destroyAllWindows()  #Close OpenCV windows
             rospy.signal_shutdown("User pressed 'q' key")
-        #check_coordinates(image, edges)
+       #check_coordinates(image, edges)
         #Display the image with the detected lines and midpoint
 
     def findFertures(self, img):
@@ -149,19 +148,14 @@ class CameraReaderNode(DTROS):
 
 
 
-kmeans = pickle.load(open('/code/catkin_ws/src/<duckie-test>/packages/my_package/src/imgs/finalized_model2.sav', 'rb'))
-kmeans1 = pickle.load(open('/code/catkin_ws/src/<duckie-test>/packages/my_package/src/imgs/finalized_model.sav', 'rb'))
-kmeans2 = pickle.load(open('/code/catkin_ws/src/<duckie-test>/packages/my_package/src/imgs/finalized_model3.sav', 'rb'))
-
-centroids = kmeans.cluster_centers_
-centroids2 = kmeans1.cluster_centers_
-centroids3 = kmeans2.cluster_centers_
-
 #point is the current color
 def closest_centroid(point):
-    first_centroid = centroids
-    second_centroid = centroids2
-    third_centroid = centroids3
+    secondList = [[191.62790698, 210.06976744,  73.09302326], [175.10843373, 192.15662651,  44.60240964], [176.20930233, 192.58139535,  11.76744186]]
+    firstList = [168.85185185, 204.81481481, 184.66666667], [ 54.94444444,  78.16666667,  43.97222222], [109.10526316, 141.36842105, 117.84210526]
+    thirdList = [199.30232558,  83.74418605,  73.37209302], [233.70588235, 103.76470588,  95.70588235], [237.7173913 ,  83.43478261,  75.95652174]
+    first_centroid = firstList
+    second_centroid = secondList
+    third_centroid = thirdList
     currnt_shortest_distance = 100000
     currentColor = (0, 0, 0)
     for i in range(len(first_centroid)):

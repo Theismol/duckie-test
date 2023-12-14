@@ -1,7 +1,5 @@
 import heapq
 
-
-
 def astar(start, goal, graph):
     open_set = {}
     closed_set = {}
@@ -13,6 +11,7 @@ def astar(start, goal, graph):
         # Get the node with the lowest total cost from the open set
         current_node = min(open_set, key=lambda node: open_set[node][2])
         current_cost, path, total_cost = open_set[current_node]
+        
 
         # Remove the current node from the open set
         del open_set[current_node]
@@ -32,6 +31,8 @@ def astar(start, goal, graph):
             # Calculate the tentative f score
             h_score = heuristic(neighbor, goal)
             tentative_f_score = tentative_g_score + h_score
+            
+            # print(f"current_node: {current_node}, neighbor: {neighbor}, tentative_f_score: {tentative_f_score}, tentative_g_score: {tentative_g_score}, h_score: {h_score}, weight: {weight}, current_cost: {current_cost}, total_cost: {total_cost}")
 
             # Calculate the total cost by adding the current total cost and the edge weight
             tentative_total_cost = total_cost + weight
@@ -56,36 +57,88 @@ def heuristic(node, goal):
 def get_directions(path):
     directions = []
     directions_numbers = []
+    directions_dict = {}
     for i in range(len(path) - 1):
-        current_node = path[i]
-        next_node = path[i + 1]
-        if next_node[0] > current_node[0]:
-            directions.append('down')
-        elif next_node[0] < current_node[0]:
-            directions.append('up')
-        elif next_node[1] > current_node[1]:
-            directions.append('right')
-        elif next_node[1] < current_node[1]:
-            directions.append('left')
+     current_node = path[i]
+     next_node = path[i + 1]
+     if next_node[0] > current_node[0]:
+         directions.append('down')
+     elif next_node[0] < current_node[0]:
+         directions.append('up')
+     elif next_node[1] > current_node[1]:
+         directions.append('right')
+     elif next_node[1] < current_node[1]:
+         directions.append('left')
     current_direction = directions[0]
     for direction in directions:
         if direction == current_direction:
-            directions_numbers.append(1)
+            directions_numbers.append("f")
         elif direction == "up" and current_direction == "right" or direction == "right" and current_direction == "down" or direction == "down" and current_direction == "left" or direction == "left" and current_direction == "up":
-            directions_numbers.append(2)
-            directions_numbers.append(1)
+            directions_numbers.append("l")
             current_direction=direction
         elif direction == "up" and current_direction == "left" or direction == "left" and current_direction == "down" or direction == "down" and current_direction == "right" or direction == "right" and current_direction == "up":
-            directions_numbers.append(0)
-            directions_numbers.append(1)
+            directions_numbers.append("r")
             current_direction=direction
-    return directions_numbers
+    for i in range(len(path)-1):
+        directions_dict[path[i]] = directions_numbers[i]
+    return directions_dict
+
+def find_intersections(path, graph):
+    in_intersection_list = []
+    start_intersection_list = []
+    new_path = {}
+    for node, weight in graph.items():
+        if (len(graph[node].items()) > 1 or weight == 20) and node in path:
+            in_intersection_list.append(node)
+            print(node)
+    for node in graph:
+        if graph[node] and list(graph[node].keys())[0] in in_intersection_list and node not in in_intersection_list and node in path:
+            print(node)
+            start_intersection_list.append(node)
+    for node, direction in path.items():
+        if node in start_intersection_list or node in in_intersection_list:
+            new_path[node] = direction
+    return new_path
+
+
+def get_instructions(path, graph):
+    instructions = []
+    for i in range(len(path) - 2):
+        current_node = path[i]
+        next_node = path[i + 1]
+        next_next_node = path[i + 2]
+
+        if next_next_node in graph[next_node] and graph[next_node][next_next_node] == 20:
+            dx1 = next_node[0] - current_node[0]
+            dy1 = next_node[1] - current_node[1]
+            dx2 = next_next_node[0] - next_node[0]
+            dy2 = next_next_node[1] - next_node[1]
+
+            cross_product = dx1 * dy2 - dy1 * dx2
+
+            if cross_product == 1:  # Right
+                instructions.append('2')
+            elif cross_product == -1:  # Left
+                instructions.append('3')
+            else:  # Forward
+                instructions.append('1')
+
+    return instructions
 
 
 
 
+    
+    
 
 
+
+'''def calculate_cost_of_path(path, graph):
+    cost = 0
+    for i in range(len(path) - 1):
+        cost += graph[path[i]][path[i + 1]]
+    return cost
+'''
 
 
 
@@ -204,7 +257,7 @@ graph = {
     (6, 15): {},
     (7, 0): {(7,1):1},
     (7, 1): {(7,2):1},
-    (7, 2): {(7,3):20,(8,2):1},
+    (7, 2): {(8,2):1,(7,3):20},
     (7, 3): {(6,3):20},
     (7, 4): {(8,4):1},
     (7, 5): {(6,5):1},
@@ -284,11 +337,9 @@ graph = {
     (11, 15): {}
 }
 
-
-# Example start and goal nodes
-if __name__ == '__main__':
-    start_node = (7, 0)
-    goal_node = (0, 9)
+def getRoad():
+    start_node = (10, 6)
+    goal_node = (6, 0)
 
     path, cost = astar(start_node, goal_node, graph)
     if path:
@@ -296,6 +347,26 @@ if __name__ == '__main__':
         print("Total cost:", cost)
     else:
         print("No path found")
-    print(get_directions(path))
+    directions = get_directions(path)
+    #print(directions)
+    directions = find_intersections(directions, graph)
+    return directions
+
+
+# Example start and goal nodes
+if __name__ == '__main__':
+    start_node = (10, 6)
+    goal_node = (6, 0)
+
+    path, cost = astar(start_node, goal_node, graph)
+    if path:
+        print("Path found:", path)
+        print("Total cost:", cost)
+    else:
+        print("No path found")
+    directions = get_directions(path)
+    print(directions)
+    print(find_intersections(directions, graph))
 
 # Create an image to visualize the maze and the path
+
