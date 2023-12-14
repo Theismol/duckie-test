@@ -54,38 +54,39 @@ def heuristic(node, goal):
 
 
 def get_directions(path):
-    directions = []
-    directions_numbers = []
+    directions_relative_to_grid = []
+    diretions_relative_to_duck = []
     directions_dict = {}
     for i in range(len(path) - 1):
      current_node = path[i]
      next_node = path[i + 1]
      if next_node[0] > current_node[0]:
-         directions.append('down')
+         directions_relative_to_grid.append('down')
      elif next_node[0] < current_node[0]:
-         directions.append('up')
+         directions_relative_to_grid.append('up')
      elif next_node[1] > current_node[1]:
-         directions.append('right')
+         directions_relative_to_grid.append('right')
      elif next_node[1] < current_node[1]:
-         directions.append('left')
-    current_direction = directions[0]
-    for direction in directions:
+         directions_relative_to_grid.append('left')
+    current_direction = directions_relative_to_grid[0]
+    for direction in directions_relative_to_grid:
         if direction == current_direction:
-            directions_numbers.append("f")
+            diretions_relative_to_duck.append("f")
         elif direction == "up" and current_direction == "right" or direction == "right" and current_direction == "down" or direction == "down" and current_direction == "left" or direction == "left" and current_direction == "up":
-            directions_numbers.append("l")
+            diretions_relative_to_duck.append("l")
             current_direction=direction
         elif direction == "up" and current_direction == "left" or direction == "left" and current_direction == "down" or direction == "down" and current_direction == "right" or direction == "right" and current_direction == "up":
-            directions_numbers.append("r")
+            diretions_relative_to_duck.append("r")
             current_direction=direction
     for i in range(len(path)-1):
-        directions_dict[path[i]] = directions_numbers[i]
+        directions_dict[path[i]] = diretions_relative_to_duck[i]
     return directions_dict
 
 def find_intersections(path, graph):
     in_intersection_list = []
     start_intersection_list = []
-    new_path = {}
+    new_path = []
+    prev_node = None
     for node, weight in graph.items():
         if (len(graph[node].items()) > 1 or weight == 20) and node in path:
             in_intersection_list.append(node)
@@ -93,8 +94,12 @@ def find_intersections(path, graph):
         if graph[node] and list(graph[node].keys())[0] in in_intersection_list and node not in in_intersection_list and node in path:
             start_intersection_list.append(node)
     for node, direction in path.items():
-        if node in start_intersection_list or node in in_intersection_list:
-            new_path[node] = direction
+        if node in in_intersection_list:
+            if prev_node:
+                if prev_node[0] == node[0] + 1 and prev_node[1] == node[1] or prev_node[0] == node[0] - 1 and prev_node[1] == node[1] or prev_node[1] == node[1] + 1 and prev_node[0] == node[0] or prev_node[1] == node[1] - 1 and prev_node[0] == node[0]:
+                    continue
+            new_path.append(direction)
+            prev_node = node
     return new_path
 
 
@@ -353,6 +358,7 @@ def getRoad():
 if __name__ == '__main__':
     start_node = (10, 6)
     goal_node = (6, 0)
+
 
     path, cost = astar(start_node, goal_node, graph)
     if path:
