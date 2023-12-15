@@ -6,7 +6,6 @@ from duckietown.dtros import DTROS, NodeType
 from duckietown_msgs.msg import WheelsCmdStamped
 from std_msgs.msg import String
 import lf_node as lf
-import warnings
 import main
 
 
@@ -53,7 +52,6 @@ class WheelControlNode(DTROS):
 
 
 
-
     def on_shutdown(self):
         stop = WheelsCmdStamped(vel_left=0, vel_right=0)
         self._publisher.publish(stop)
@@ -84,27 +82,55 @@ class WheelControlNode(DTROS):
             self.current_way = listOfWays[0][0]
 
     def intersectionGet(self):
+        print("------Intersection-------")
+        rate = rospy.Rate(1) #1 message every second
         if main.get_directions() == "r":
             main.remove_first()
             self.updated_way = (0.35, 0.0)
-        elif main.get_directions() == "l":
-            main.remove_first()
+            rate.sleep()
             message = WheelsCmdStamped(vel_left=0.4, vel_right=0.4)
             self._publisher.publish(message)
-            self.updated_way = (0.0, 0.35)
-        print("------Intersection-------")
-        rate = rospy.Rate(1) #1 message every second
-        rate.sleep()
-        message = WheelsCmdStamped(vel_left=0.4, vel_right=0.4)
-        self._publisher.publish(message)
-        rate.sleep()
-        message = WheelsCmdStamped(vel_left=0, vel_right=0)
-        self._publisher.publish(message)
-        rate.sleep()
-        message = WheelsCmdStamped(vel_left=self.updated_way[0], vel_right=self.updated_way[1])
-        self._publisher.publish(message)
-        rate.sleep()
-        self.intersection = False
+            rate.sleep()
+            message = WheelsCmdStamped(vel_left=0, vel_right=0)
+            self._publisher.publish(message)
+            rate.sleep()
+            message = WheelsCmdStamped(vel_left=self.updated_way[0], vel_right=self.updated_way[1])
+            self._publisher.publish(message)
+            rate.sleep()
+        elif main.get_directions() == "l":
+            main.remove_first()
+            self.updated_way = (0.36, 0.37)
+            message = WheelsCmdStamped(vel_left=self.updated_way[0], vel_right=self.updated_way[1])
+            self._publisher.publish(message)
+            rate.sleep()
+            rate.sleep()
+            message = WheelsCmdStamped(vel_left=0, vel_right=0.3)
+            self.updated_way = (0.35, 0.3)
+            self._publisher.publish(message)
+            rate.sleep()
+            message = WheelsCmdStamped(vel_left=self.updated_way[0], vel_right=self.updated_way[1])
+            self._publisher.publish(message)
+            rate.sleep()
+        if main.get_directions() == "s":
+            self.intersection = True
+            #forrword 0.4 0.4
+            message = WheelsCmdStamped(vel_left=0.4, vel_right=0.4)
+            self._publisher.publish(message)
+            rate.sleep()
+            message = WheelsCmdStamped(vel_left=0, vel_right=0)
+            self._publisher.publish(message)
+            rate.sleep()
+            #shutdowm ros
+            print("----the Robot arrived at the destination----")
+            rospy.signal_shutdown("Shutting down")
+        else:
+            message = WheelsCmdStamped(vel_left=0, vel_right=0)
+            self._publisher.publish(message)
+            rate.sleep()
+            rate.sleep()
+            rate.sleep()
+            rate.sleep()
+            self.intersection = False
 
 
 
